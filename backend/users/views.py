@@ -1,0 +1,115 @@
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets, generics, serializers
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from foodgram.models import Subscription
+from users.serializers import (CustomUserSerializer, CustomUserCreateSerializer, CustomSetPasswordSerializer, SetAvatarSerializer, FollowSerializer)
+
+User = get_user_model()
+
+class CustomUserViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomUserSerializer
+    queryset = User.objects.all()
+    pagination_class = LimitOffsetPagination
+    http_method_names = ["get", "post", "put", "delete"]
+    lookup_field = 'pk'
+
+    '''def get_queryset(self):
+        if self.action == 'subscriptions':
+            return Subscription.objects.filter(user=self.request.user.id)
+        return User.objects.all()'''
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return CustomUserSerializer
+        elif self.request.method == "PUT":
+            return SetAvatarSerializer
+        else:
+            return CustomUserCreateSerializer
+
+    @action(
+        detail=False,
+        methods=("GET", ),
+        permission_classes=(IsAuthenticated,),
+    )
+    def me(self, request):
+        user = request.user
+        serializer = CustomUserSerializer(user, context={
+        'request': request
+    })
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(
+        detail=False,
+        methods=("PUT", "DELETE"),
+        permission_classes=(IsAuthenticated,),
+        url_path='me/avatar'
+    )
+    def avatar(self, request, *args, **kwargs):
+        instance = request.user
+        if request.method == "PUT":
+            serializer = SetAvatarSerializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        instance.avatar.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=("POST", ),
+        permission_classes=(IsAuthenticated,),
+    )
+    def set_password(self, request, *args, **kwargs):
+        user = request.user
+        serializer = CustomSetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if user.check_password(serializer.data["current_password"]):
+            request.user.set_password(serializer.data["new_password"])
+            request.user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=("POST", "DELETE"),
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscribe(self, request, *args, **kwargs):
+        user = request.user
+        following_id = self.kwargs.get('pk')
+        following_user = get_object_or_404(User, id=following_id)
+        if request.method == "POST":
+            serializer = FollowSerializer(data={
+                "user": user.id,
+                "follows": following_id}, )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            serializer = CustomUserSerializer(following_user, context={
+        'request': request
+    })
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if Subscription.objects.filter(
+            user=user.id,
+            follows=following_id).exists():
+            instance = Subscription.objects.filter(
+                user=user.id,
+                follows=following_id)
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        raise serializers.ValidationError()
+        
+
+    @action(
+        detail=False,
+        methods=("GET",),
+        permission_classes=(IsAuthenticated,),    )
+    def subscriptions(self, request, *args, **kwargs):
+        user = request.user
+        #queryset = Subscription.objects.filter(user=user.id).follows
+        queryset = User.objects.filter(subscription__follows=user.id)
+        serializer = CustomUserSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
