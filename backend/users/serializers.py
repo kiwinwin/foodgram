@@ -1,18 +1,11 @@
 import re
 import base64
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser.serializers import (UserSerializer,
                                 UserCreateSerializer,
-                                TokenCreateSerializer,
-                                TokenSerializer,
-                                SetPasswordSerializer,
-                                PasswordSerializer,
-                                CurrentPasswordSerializer
                                 )
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from django.db import models
-from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator
 from api.shortrecipeserializer import ShortRecipeSerializer
 from foodgram.models import Subscription, Recipe

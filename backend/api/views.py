@@ -24,7 +24,6 @@ from foodgram.models import (Ingredients,
                              IncartRecipe,)
 
 
-
 User = get_user_model()
 
 

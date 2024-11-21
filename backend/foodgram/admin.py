@@ -1,7 +1,29 @@
 from django.contrib import admin
+from foodgram.models import (Ingredients, Recipe, Tags, RecipeTags, RecipeIngredients)
 
-from foodgram.models import (Ingredients,
-                             Tags,)
+
+'''class TagsInline(admin.TabularInline):
+    model = RecipeTags
+    extra = 1
+
+
+class IngredientsInline(admin.TabularInline):
+    model = RecipeIngredients
+    extra = 1'''
+
+
+class IngredientsAdmin(admin.ModelAdmin):
+    list_display = ("name", "measurement_unit",)
+    search_fields = ("name",)
+    empty_value_display = "-пусто-"
+
+
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author',)
+    search_fields = ('name', 'author',)
+    list_filter = ('tags', )
+    #inlines = (TagsInline, IngredientsInline)
+    empty_value_display = "-пусто-"
 
 
 class TagsAdmin(admin.ModelAdmin):
@@ -9,11 +31,6 @@ class TagsAdmin(admin.ModelAdmin):
     empty_value_display = "-пусто-"
 
 
-class IngredientsAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "measurement_unit",)
-    search_fields = ("name",)
-    empty_value_display = "-пусто-"
-
-
-admin.site.register(Tags, TagsAdmin)
 admin.site.register(Ingredients, IngredientsAdmin)
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(Tags, TagsAdmin)

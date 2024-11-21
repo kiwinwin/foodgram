@@ -1,21 +1,24 @@
 from django.contrib.auth import get_user_model
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, generics, serializers
+from rest_framework import status, viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from users.serializers import (
+    CustomUserSerializer,
+    CustomUserCreateSerializer,
+    CustomSetPasswordSerializer,
+    SetAvatarSerializer,
+    FollowCreateSerializer,
+    FollowUserSerializer,
+    ManyFollowUserSerializer)
 from foodgram.models import Subscription
-from users.serializers import (CustomUserSerializer, CustomUserCreateSerializer, CustomSetPasswordSerializer, SetAvatarSerializer, FollowCreateSerializer, FollowUserSerializer,
-ManyFollowUserSerializer)
 
 User = get_user_model()
 
 
-
 class CustomUserViewSet(viewsets.ModelViewSet):
-    #serializer_class = CustomUserSerializer
     queryset = User.objects.all()
     pagination_class = PageNumberPagination
     http_method_names = ["get", "post", "put", "delete"]
@@ -111,7 +114,8 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=("GET",),
-        permission_classes=(IsAuthenticated,), )
+        permission_classes=(IsAuthenticated,),
+        )
     def subscriptions(self, request, *args, **kwargs):
         query_dict = request.query_params.copy()
         user = request.user
@@ -126,4 +130,3 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         'request': request
     }, many=True)
         return self.get_paginated_response(serializer.data)
-        

@@ -4,19 +4,20 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
-    follows = models.ForeignKey(User, on_delete=models.SET_NULL,
-                                  related_name='follows',
-                                  null=True, blank=True,)
+    follows = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='follows',
+        null=True, blank=True,)
 
     class Meta:
 
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-    
-    '''def __str__(self):
-        return {self.follows}'''
+
 
 class Tags(models.Model):
     name = models.CharField('Название тега',
@@ -32,7 +33,7 @@ class Tags(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Ingredients(models.Model):
@@ -48,17 +49,26 @@ class Ingredients(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return f'{self.name }{self.measurement_unit}'
+        return f'{self.name} {self.measurement_unit}'
 
 
 class IngredientsAmount(models.Model):
-    ingredient = models.ForeignKey(Ingredients, on_delete=models.CASCADE,)
-    amount = models.IntegerField(validators=[
-        MinValueValidator(1)
-    ])
+    ingredient = models.ForeignKey(
+        Ingredients,
+        on_delete=models.CASCADE,
+        verbose_name='Название ингредиента',)
+    amount = models.IntegerField(
+        'Количество',
+        validators=[MinValueValidator(1),],)
+
     class Meta:
         ordering = ('id',)
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
+    
+    def __str__(self):
+        return f'{self.ingredient} {self.amount}'
 
 class Recipe(models.Model):
     image = models.ImageField(
@@ -71,18 +81,17 @@ class Recipe(models.Model):
         'Время приготовления (в минутах)',)
     tags = models.ManyToManyField(
         Tags,
-        through='RecipeTags',)
+        through='RecipeTags',
+        verbose_name='Теги')
     ingredients = models.ManyToManyField(
         IngredientsAmount,
         through='RecipeIngredients',
-        )
+        verbose_name='Ингредиенты')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор рецепта',)
-    
-    #REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
-    
+
     class Meta:
         ordering = ["name"]
         verbose_name = "Рецепт"
@@ -95,7 +104,16 @@ class RecipeTags(models.Model):
         on_delete=models.CASCADE)
     tag = models.ForeignKey(
         Tags,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        verbose_name='Тег')
+    
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+    
+    def __str__(self):
+        return self.tag.slug
 
 
 class RecipeIngredients(models.Model):
@@ -105,8 +123,15 @@ class RecipeIngredients(models.Model):
     ingredient = models.ForeignKey(
         IngredientsAmount,
         on_delete=models.CASCADE)
+    
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+    
+    def __str__(self):
+        return self.ingredient.id
         
-
 
 class FavoriteRecipe(models.Model):
     recipe = models.ForeignKey(
