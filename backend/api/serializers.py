@@ -3,7 +3,7 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
+from users.serializers import CustomUserSerializer
 from foodgram.models import (Ingredients,
                              Tags,
                              IngredientsAmount,
@@ -11,9 +11,8 @@ from foodgram.models import (Ingredients,
                              Recipe,
                              RecipeTags,
                              FavoriteRecipe,
-                             IncartRecipe
-)
-from users.serializers import CustomUserSerializer
+                             IncartRecipe)
+
 
 
 User = get_user_model()

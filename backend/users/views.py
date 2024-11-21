@@ -1,27 +1,33 @@
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, generics, serializers
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from foodgram.models import Subscription
-from users.serializers import (CustomUserSerializer, CustomUserCreateSerializer, CustomSetPasswordSerializer, SetAvatarSerializer, FollowSerializer)
+from users.serializers import (CustomUserSerializer, CustomUserCreateSerializer, CustomSetPasswordSerializer, SetAvatarSerializer, FollowCreateSerializer, FollowUserSerializer,
+ManyFollowUserSerializer)
 
 User = get_user_model()
 
+
+
 class CustomUserViewSet(viewsets.ModelViewSet):
-    serializer_class = CustomUserSerializer
+    #serializer_class = CustomUserSerializer
     queryset = User.objects.all()
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     http_method_names = ["get", "post", "put", "delete"]
     lookup_field = 'pk'
 
-    '''def get_queryset(self):
-        if self.action == 'subscriptions':
-            return Subscription.objects.filter(user=self.request.user.id)
-        return User.objects.all()'''
-
+    def get_queryset(self):
+        queryset = User.objects.all()
+        query_dict = self.request.query_params.copy()
+        if 'limit' in query_dict:
+            limit = query_dict.get('limit')
+            return queryset[:int(limit)]
+        return queryset
     def get_serializer_class(self):
         if self.request.method == "GET":
             return CustomUserSerializer
@@ -83,12 +89,12 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         following_id = self.kwargs.get('pk')
         following_user = get_object_or_404(User, id=following_id)
         if request.method == "POST":
-            serializer = FollowSerializer(data={
+            serializer = FollowCreateSerializer(data={
                 "user": user.id,
                 "follows": following_id}, )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            serializer = CustomUserSerializer(following_user, context={
+            serializer = FollowUserSerializer(following_user, context={
         'request': request
     })
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -100,16 +106,24 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 follows=following_id)
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        raise serializers.ValidationError()
-        
+        raise serializers.ValidationError()  
 
     @action(
         detail=False,
         methods=("GET",),
-        permission_classes=(IsAuthenticated,),    )
+        permission_classes=(IsAuthenticated,), )
     def subscriptions(self, request, *args, **kwargs):
+        query_dict = request.query_params.copy()
         user = request.user
-        #queryset = Subscription.objects.filter(user=user.id).follows
-        queryset = User.objects.filter(subscription__follows=user.id)
-        serializer = CustomUserSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        queryset = Subscription.objects.filter(user=user.id)
+        if 'limit' in query_dict:
+            print(query_dict.get('limit'))
+            limit = query_dict.get('limit')
+            queryset = queryset[:int(limit)]
+        print(queryset)
+        paginator = self.paginate_queryset(queryset)
+        serializer = ManyFollowUserSerializer(paginator, context={
+        'request': request
+    }, many=True)
+        return self.get_paginated_response(serializer.data)
+        

@@ -1,32 +1,29 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-#from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, filters, mixins, status, serializers
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-
-from foodgram.models import (Ingredients,
-                             Tags,
-                             IngredientsAmount,
-                             Recipe,
-                             RecipeTags,
-                             FavoriteRecipe,
-                             IncartRecipe,
-                             Subscription)
+from api.permissions import IsAuthenticatedOrAuthorOrReadOnly
 from api.serializers import (IngredientsSerializer,
                              TagsSerializer,
                              RecipeCreateSerializer,
-                             
                              IngredientsAmountCreateSerializer,
                              IngredientsAmountSerializer,
                              FavoriteRecipeSerializer,
                              ShortRecipeSerializer,
                              IncartRecipeSerializer
 )
-from api.permissions import IsAuthenticatedOrAuthorOrReadOnly
+from foodgram.models import (Ingredients,
+                             Tags,
+                             IngredientsAmount,
+                             Recipe,
+                             RecipeIngredients,
+                             FavoriteRecipe,
+                             IncartRecipe,)
+
+
 
 User = get_user_model()
 
@@ -51,63 +48,42 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipesViewSet(viewsets.ModelViewSet):
 
-    #pagination_class = LimitOffsetPagination
     serializer_class = RecipeCreateSerializer
     permission_classes = (IsAuthenticatedOrAuthorOrReadOnly,)
     pagination_class = PageNumberPagination
-    #queryset = Recipe.objects.all()
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
         query_dict = self.request.query_params.copy()
+        limit = query_dict.get('limit')
         author = query_dict.get('author')
+        is_favorited = query_dict.get('is_favorited')
+        is_in_shopping_cart = query_dict.get('is_in_shopping_cart')
+        if 'tags' in query_dict:
+            tag_ids = []
+            tags = query_dict.pop('tags')
+            for tag in tags:
+                tag_ids.append(Tags.objects.get(slug=tag).id)
+            return Recipe.objects.filter(tags__in=tag_ids)
         if author is not None:
             queryset = Recipe.objects.filter(author=author)
             return queryset
+        if limit is not None:
+            return queryset[:int(limit)]
+        if is_favorited is not None:
+            fav_ids = []
+            if bool(int(is_favorited)):
+                for obj in FavoriteRecipe.objects.filter(user=self.request.user.id):
+                    fav_ids.append(obj.recipe.id)
+                return Recipe.objects.filter(id__in=fav_ids)
+        if is_in_shopping_cart is not None:
+            incart_ids = []
+            if bool(int(is_in_shopping_cart)):
+                for obj in IncartRecipe.objects.filter(user=self.request.user.id):
+                    incart_ids.append(obj.recipe.id)
+                return Recipe.objects.filter(id__in=incart_ids)
         return queryset
-        '''tags=query_dict.pop('tags')
-        print(tags)
-        print(len(tags))
-        if tags is not None:
-            #tags_queryset = Recipe.objects.filter(tags__slug=tags[0])
-            for tag in tags:
-                tags_queryset = Recipe.objects.filter(tags__slug=tag)
-                tags_queryset = tags_queryset.union
-            queryset = tags_queryset
-            print(queryset)
-            return queryset
-            #print(recipe_tags_queryset)'''
-        
 
-
-    '''def get_queryset(self):
-        queryset = Recipe.objects.all()
-        query_dict = self.request.query_params.copy()
-        print(query_dict)
-        author = query_dict.get('author')
-        tags = query_dict.pop('tags')
-        print(author)
-        print(tags)
-        print(query_dict)
-        if author is not None:
-            author_queryset = Recipe.objects.filter(author=author)
-            queryset = author_queryset
-        if tags is not None:
-            tags_queryset = Recipe.objects.filter(tags__slug=tags[0])
-            for tag in tags:
-                tags_queryset.union(Recipe.objects.filter(tags__slug=tag))
-            queryset = tags_queryset
-        if (author and tags) is not None:
-            queryset = tags_queryset.union(author_queryset)
-        return queryset'''
-
-    ''' tags = query_dict.pop('tags')
-        tags_queryset = Recipe.objects.filter(tags__slug=tags[0])
-        for tag in tags:
-            tags_queryset.union(Recipe.objects.filter(tags__slug=tag))
-        print(query_dict)
-        print(tags)
-        return tags_queryset'''
     @action(
         detail=True,
         methods=("POST", "DELETE",),
@@ -157,6 +133,42 @@ class RecipesViewSet(viewsets.ModelViewSet):
         raise serializers.ValidationError()
 
     @action(
+        detail=False,
+        methods=("GET",),
+        permission_classes=(IsAuthenticated,),
+    )
+    def download_shopping_cart(self, request, *args, **kwargs):
+        user = request.user
+        queryset = IncartRecipe.objects.filter(user=user.id)
+        recipes = []
+        ingredients_amount = []
+        for obj in queryset:
+            recipes.append(obj.recipe.id)
+        for recipe in recipes:
+            recipe_filter_qs = RecipeIngredients.objects.filter(recipe=recipe)
+            for obj in recipe_filter_qs:
+                ingredients_amount.append(obj.ingredient.id)
+        result = {}
+        print(recipes)
+        print(ingredients_amount)
+        for ingredient_amount in ingredients_amount:
+            obj = IngredientsAmount.objects.get(id=ingredient_amount)
+            if (obj.ingredient.name, obj.ingredient.measurement_unit) in result:
+                old_value = result[obj.ingredient.name, obj.ingredient.measurement_unit]
+                result[obj.ingredient.name, obj.ingredient.measurement_unit] = old_value + obj.amount
+            else:
+                result[obj.ingredient.name, obj.ingredient.measurement_unit] = obj.amount
+        print(result)
+        str_result = 'Список покупок \n'
+        for key, value in result.items():
+            str_result += key[0] + ' (' + key[1] + ') — ' + str(value) + '\n'
+        print(str_result)
+        with open('purchase_list.txt', 'w', encoding='utf-8') as file:
+            file.write(str_result,)
+            file.close()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(
         detail=True,
         methods=("GET",),
         permission_classes=(AllowAny,),
@@ -165,9 +177,9 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def get_link(self, request, *args, **kwargs):
         recipe_id = self.kwargs.get('pk')
         get_object_or_404(Recipe, id=recipe_id)
-        shor_link = request.build_absolute_uri()
+        short_link = request.build_absolute_uri()
         return Response({
-            "short-link": shor_link
+            "short-link": short_link
         },
         status=status.HTTP_200_OK)
 
@@ -175,7 +187,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
 class IngredientsAmountViewSet(viewsets.ModelViewSet):
     
     queryset = IngredientsAmount.objects.all()
-    #serializer_class = IngredientsAmountCreateSerializer
     
     def get_serializer_class(self):
         if self.request.method == 'GET':

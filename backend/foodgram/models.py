@@ -15,8 +15,8 @@ class Subscription(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
     
-    def __str__(self):
-        return {self.user}
+    '''def __str__(self):
+        return {self.follows}'''
 
 class Tags(models.Model):
     name = models.CharField('Название тега',
@@ -105,6 +105,7 @@ class RecipeIngredients(models.Model):
     ingredient = models.ForeignKey(
         IngredientsAmount,
         on_delete=models.CASCADE)
+        
 
 
 class FavoriteRecipe(models.Model):

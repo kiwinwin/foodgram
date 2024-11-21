@@ -14,8 +14,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator
-#from api.serializers import ShortRecipeSerializer
-from foodgram.models import Subscription
+from api.shortrecipeserializer import ShortRecipeSerializer
+from foodgram.models import Subscription, Recipe
 
 User = get_user_model()
 
@@ -43,12 +43,10 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request', None)
         try:
-            Subscription.objects.get(user=request.user.id,
-            follows=obj.id)
+            Subscription.objects.get(user=request.user.id, follows=obj.id)
             return True
         except Exception as error:
             return False
-
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -70,12 +68,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         fields = ('id', 'email', "username", 'first_name', 'last_name', "password")
         model = User
         read_only_fields = ('id', 'avatar', )
-    
-    '''def to_representation(self, instance):
-        request = self.context.get('request', None)
-        representation = super().to_representation(instance)
-        representation['is_subscribed'] = Subscription.objects.filter(follows=instance.id, user=request.user.id).exists()
-        return representation'''
 
     def validate_username(self, value):
         if not re.match(r'^[\w.@+-]+$', value):
@@ -96,6 +88,7 @@ class SetAvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar', )
         model = User
 
+    # исправить - топорно
     def validate_avatar(self, value):
         if not value:
             raise serializers.ValidationError()
@@ -108,7 +101,7 @@ class SetAvatarSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class FollowSerializer(serializers.ModelSerializer):
+class FollowCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         fields = ('user', 'follows')
@@ -118,15 +111,34 @@ class FollowSerializer(serializers.ModelSerializer):
             serializers.UniqueTogetherValidator(
                 queryset=Subscription.objects.all(),
                 fields=('user', 'follows'))]
-
-    '''def to_representation(self, instance):
-        request = self.context.get('request', None)
-        representation = super().to_representation(instance)
-        representation['recipes'] = '''
-
+    
     def validate(self, data):
         if data["user"] == data["follows"]:
             raise serializers.ValidationError()
         return data
     
+
+class FollowUserSerializer(CustomUserSerializer):
+      
+    def to_representation(self, instance):
+        request = self.context.get('request', None)
+        query_dict = request.query_params.copy()
+        representation = super().to_representation(instance)
+        representation['recipes'] = []
+        recipes_queryset = Recipe.objects.filter(author=instance.id)
+        if 'recipes_limit' in query_dict:
+            recipes_limit = query_dict.get('recipes_limit')
+            recipes_queryset = recipes_queryset[:int(recipes_limit)]
+        for db_recipe in recipes_queryset:
+            recipe = ShortRecipeSerializer(db_recipe).data
+            representation['recipes'].append(recipe)
+        representation['recipes_count'] = len(representation['recipes'])
+        return representation
+
+class ManyFollowUserSerializer(FollowUserSerializer):
+
+    def to_representation(self, instance):
+        request = self.context.get('request', None)
+        representation = super().to_representation(instance.follows)
+        return representation
 
