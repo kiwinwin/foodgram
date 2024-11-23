@@ -1,7 +1,6 @@
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
 from foodgram.models import (Ingredients,
@@ -78,7 +77,6 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
             serializers.UniqueTogetherValidator(
                 queryset=FavoriteRecipe.objects.all(),
                 fields=('user', 'recipe'))]
-    
 
 
 class IncartRecipeSerializer(serializers.ModelSerializer):
