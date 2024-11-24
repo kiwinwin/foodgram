@@ -7,8 +7,8 @@ SECRET_KEY = 'django-insecure-2(ukxf*yo&yjbj5pqx+ul*n%v$2!t*@4ru)wyn7f!e20^f1mnp
 
 DEBUG = True
 
-#ALLOWED_HOSTS = ['localhost:8000', '127.0.0.1', 'kiwifoodgram.duckdns.org']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '89.169.167.246', 'kiwifoodgram.duckdns.org']
+#ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,7 +91,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-#STATIC_ROOT = BASE_DIR / 'collected_static'
+STATIC_ROOT = BASE_DIR / 'collected_static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
