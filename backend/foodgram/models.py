@@ -91,9 +91,10 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор рецепта',)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ("-created_at", )
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
 

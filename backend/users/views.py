@@ -17,10 +17,13 @@ from foodgram.models import Subscription
 
 User = get_user_model()
 
+class CustomUserPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'limit'
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    pagination_class = PageNumberPagination
+    pagination_class = CustomUserPagination
     http_method_names = ["get", "post", "put", "delete"]
     lookup_field = 'pk'
 
