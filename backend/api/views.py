@@ -28,6 +28,7 @@ from foodgram.models import (Ingredients,
 User = get_user_model()
 
 class RecipePagination(PageNumberPagination):
+    page_size = 100
     page_size_query_param = 'limit'
     max_page_size = 1000
     
@@ -83,6 +84,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 tag_ids.append(Tags.objects.get(slug=tag).id)
             queryset = queryset.filter(tags__in=tag_ids).distinct()
         return queryset
+        
 
     @action(
         detail=True,

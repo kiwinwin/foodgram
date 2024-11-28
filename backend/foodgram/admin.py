@@ -1,15 +1,27 @@
 from django.contrib import admin
-from foodgram.models import (Ingredients, Recipe, Tags, RecipeTags, RecipeIngredients)
+from foodgram.models import (
+    Ingredients,
+    Recipe,
+    Tags,
+    RecipeTags,
+    RecipeIngredients,
+    IngredientsAmount,
+    FavoriteRecipe)
 
 
-'''class TagsInline(admin.TabularInline):
+class TagsInline(admin.StackedInline):
     model = RecipeTags
-    extra = 1
+    extra = 0
 
 
-class IngredientsInline(admin.TabularInline):
+class IngredientsAmountAdmin(admin.ModelAdmin):
+
+    list_display = ("ingredient", "amount",)
+
+
+class RecipeIngredientsInline(admin.StackedInline):
     model = RecipeIngredients
-    extra = 1'''
+    extra = 0
 
 
 class IngredientsAdmin(admin.ModelAdmin):
@@ -19,11 +31,26 @@ class IngredientsAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author',)
-    search_fields = ('name', 'author',)
+    list_display = ('name', 'author', )
+    readonly_fields = ['favorited_count']
+    fieldsets = (
+        (None, {
+            'fields': [(
+                'name',
+                'image',
+                'text',
+                'cooking_time',),
+                'favorited_count'],
+                }),
+                )
+    search_fields = ('name', 'author__first_name',)
     list_filter = ('tags', )
-    #inlines = (TagsInline, IngredientsInline)
+    inlines = [TagsInline, RecipeIngredientsInline, ]
     empty_value_display = "-пусто-"
+
+    @admin.display(description='Общее число добавлений в избранное')
+    def favorited_count(self, obj):
+        return FavoriteRecipe.objects.filter(recipe=obj.id).count()
 
 
 class TagsAdmin(admin.ModelAdmin):
@@ -34,3 +61,4 @@ class TagsAdmin(admin.ModelAdmin):
 admin.site.register(Ingredients, IngredientsAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tags, TagsAdmin)
+admin.site.register(IngredientsAmount, IngredientsAmountAdmin)

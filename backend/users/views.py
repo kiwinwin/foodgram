@@ -18,8 +18,9 @@ from foodgram.models import Subscription
 User = get_user_model()
 
 class CustomUserPagination(PageNumberPagination):
-    page_size = 5
+    page_size = 100
     page_size_query_param = 'limit'
+    max_page_size = 1000
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -27,13 +28,6 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     lookup_field = 'pk'
 
-    def get_queryset(self):
-        queryset = User.objects.all()
-        query_dict = self.request.query_params.copy()
-        if 'limit' in query_dict:
-            limit = query_dict.get('limit')
-            return queryset[:int(limit)]
-        return queryset
     def get_serializer_class(self):
         if self.request.method == "GET":
             return CustomUserSerializer

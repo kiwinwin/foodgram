@@ -63,12 +63,12 @@ class IngredientsAmount(models.Model):
 
     class Meta:
         ordering = ('id',)
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
 
     
     def __str__(self):
-        return f'{self.ingredient} {self.amount}'
+        return f'{self.ingredient.name} {self.amount}'
 
 class Recipe(models.Model):
     image = models.ImageField(
@@ -131,7 +131,7 @@ class RecipeIngredients(models.Model):
         verbose_name_plural = 'Ингредиенты'
     
     def __str__(self):
-        return self.ingredient.id
+        return self.ingredient.ingredient.name
         
 
 class FavoriteRecipe(models.Model):

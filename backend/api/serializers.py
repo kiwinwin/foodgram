@@ -29,6 +29,14 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
+class TagsSerializer(serializers.ModelSerializer):
+
+    
+    class Meta:
+        fields = ('id', 'name', 'slug',)
+        model = Tags
+
+
 class IngredientsSerializer(serializers.ModelSerializer):
 
 
@@ -36,14 +44,6 @@ class IngredientsSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
         model = Ingredients
 
-
-class TagsSerializer(serializers.ModelSerializer):
-
-    
-    class Meta:
-        fields = ('id', 'name', 'slug',)
-        model = Tags
-        
 
 class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
@@ -54,7 +54,6 @@ class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'amount',)
         model = IngredientsAmount
-    
 
 
 class IngredientsAmountSerializer(serializers.ModelSerializer):
@@ -101,7 +100,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
     class Meta:
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time')
+        fields = (
+            'id', 'tags', 'author'
+            'ingredients', 'is_favorited', 'is_in_shopping_cart',
+            'name', 'image', 'text', 'cooking_time')
         model = Recipe
     
     def get_is_favorited(self, obj):
