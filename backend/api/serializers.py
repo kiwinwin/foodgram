@@ -166,7 +166,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         try:
             ingredients = validated_data.pop('ingredients')
             tags = validated_data.pop('tags')
-        except Exception as error:
+        except Exception:
             raise serializers.ValidationError()
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
@@ -179,7 +179,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             ingredient = current_ingredient['ingredient']
             amount = current_ingredient["amount"]
             ingredient_amount, status = IngredientsAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
-            RecipeIngredients.objects.create(recipe=instance, ingredient=ingredient_amount)
+            RecipeIngredients.objects.update_or_create(recipe=instance, ingredient=ingredient_amount)
         return instance
 
 

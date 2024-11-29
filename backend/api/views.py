@@ -51,6 +51,17 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagsSerializer
 
 
+'''class IngredientsAmountViewSet(viewsets.ModelViewSet):
+    
+    queryset = IngredientsAmount.objects.all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return IngredientsAmountSerializer
+        else:
+            return IngredientsAmountCreateSerializer'''
+
+
 class RecipesViewSet(viewsets.ModelViewSet):
 
     serializer_class = RecipeCreateSerializer
@@ -84,7 +95,14 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 tag_ids.append(Tags.objects.get(slug=tag).id)
             queryset = queryset.filter(tags__in=tag_ids).distinct()
         return queryset
-        
+    
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
 
     @action(
         detail=True,
@@ -186,12 +204,3 @@ class RecipesViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK)
 
 
-class IngredientsAmountViewSet(viewsets.ModelViewSet):
-    
-    queryset = IngredientsAmount.objects.all()
-    
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return IngredientsAmountSerializer
-        else:
-            return IngredientsAmountCreateSerializer
