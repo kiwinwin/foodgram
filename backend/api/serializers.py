@@ -163,23 +163,29 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     
     # исправить валидацию отсутствующих полей, эксепшн без конкретики
     def update(self, instance, validated_data):
-        try:
-            ingredients = validated_data.pop('ingredients')
-            tags = validated_data.pop('tags')
-        except Exception:
-            raise serializers.ValidationError()
+        ingredients = validated_data.get('ingredients', [])
+        tags = validated_data.get('tags', [])
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
+        if 'image' in validated_data:
+            self.image = Base64ImageField()
         instance.cooking_time = validated_data.get('cooking_time', instance.cooking_time)
         instance.save()
-        for tag in tags:
-            RecipeTags.objects.get_or_create(
-                recipe=instance, tag=tag)
-        for current_ingredient in ingredients:
-            ingredient = current_ingredient['ingredient']
-            amount = current_ingredient["amount"]
-            ingredient_amount, status = IngredientsAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
-            RecipeIngredients.objects.update_or_create(recipe=instance, ingredient=ingredient_amount)
+        if tags:
+            instance.tags.clear()
+            for tag in tags:
+                RecipeTags.objects.create(recipe=instance, tag=tag)
+        else:
+            self.validate_tags(tags)
+        if ingredients:
+            instance.ingredients.clear()
+            for current_ingredient in ingredients:
+                ingredient = current_ingredient['ingredient']
+                amount = current_ingredient["amount"]
+                ingredient_amount, status = IngredientsAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
+                RecipeIngredients.objects.create(recipe=instance, ingredient=ingredient_amount)
+        else:
+            self.validate_tags(ingredients)
         return instance
 
 
