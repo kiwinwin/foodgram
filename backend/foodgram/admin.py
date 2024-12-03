@@ -1,16 +1,16 @@
 from django.contrib import admin
 from foodgram.models import (
-    Ingredients,
+    Ingredient,
     Recipe,
-    Tags,
-    RecipeTags,
-    RecipeIngredients,
-    IngredientsAmount,
+    Tag,
+    RecipeTag,
+    RecipeIngredient,
+    IngredientAmount,
     FavoriteRecipe)
 
 
 class TagsInline(admin.StackedInline):
-    model = RecipeTags
+    model = RecipeTag
     extra = 0
 
 
@@ -20,7 +20,7 @@ class IngredientsAmountAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientsInline(admin.StackedInline):
-    model = RecipeIngredients
+    model = RecipeIngredient
     extra = 0
 
 
@@ -58,7 +58,7 @@ class TagsAdmin(admin.ModelAdmin):
     empty_value_display = "-пусто-"
 
 
-admin.site.register(Ingredients, IngredientsAdmin)
+admin.site.register(Ingredient, IngredientsAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Tags, TagsAdmin)
-admin.site.register(IngredientsAmount, IngredientsAmountAdmin)
+admin.site.register(Tag, TagsAdmin)
+admin.site.register(IngredientAmount, IngredientsAmountAdmin)

@@ -3,15 +3,14 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
-from foodgram.models import (Ingredients,
-                             Tags,
-                             IngredientsAmount,
-                             RecipeIngredients,
+from foodgram.models import (Ingredient,
+                             Tag,
+                             IngredientAmount,
+                             RecipeIngredient,
                              Recipe,
-                             RecipeTags,
+                             RecipeTag,
                              FavoriteRecipe,
                              IncartRecipe)
-
 
 
 User = get_user_model()
@@ -34,35 +33,35 @@ class TagsSerializer(serializers.ModelSerializer):
     
     class Meta:
         fields = ('id', 'name', 'slug',)
-        model = Tags
+        model = Tag
 
 
-class IngredientsSerializer(serializers.ModelSerializer):
+class IngredientSerializer(serializers.ModelSerializer):
 
 
     class Meta:
         fields = ('id', 'name', 'measurement_unit')
-        model = Ingredients
+        model = Ingredient
 
 
-class IngredientsAmountCreateSerializer(serializers.ModelSerializer):
+class IngredientAmountCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient',
-        queryset=Ingredients.objects.all(),
+        queryset=Ingredient.objects.all(),
     )
 
     class Meta:
         fields = ('id', 'amount',)
-        model = IngredientsAmount
+        model = IngredientAmount
 
 
-class IngredientsAmountSerializer(serializers.ModelSerializer):
+class IngredientAmountSerializer(serializers.ModelSerializer):
     
-    ingredient = IngredientsSerializer()
+    ingredient = IngredientSerializer()
 
     class Meta:
         fields = ('ingredient', 'amount')
-        model = IngredientsAmount
+        model = IngredientAmount
 
 
 
@@ -94,7 +93,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     tags = TagsSerializer(many=True)
     author = CustomUserSerializer()
-    ingredients = IngredientsAmountSerializer(many=True)
+    ingredients = IngredientAmountSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -117,23 +116,23 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
 
-    ingredient = IngredientsAmountCreateSerializer()
+    ingredient = IngredientAmountCreateSerializer()
 
     class Meta:
         fields = ('id', 'ingredient', 'recipe')
-        model = RecipeIngredients
+        model = RecipeIngredient
         read_only_fields = ('id', 'ingredient', 'recipe')
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
 
-    ingredients = IngredientsAmountCreateSerializer(
+    ingredients = IngredientAmountCreateSerializer(
         many=True,
         required=True
     )
-    
+
     tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tags.objects.all(),
+        queryset=Tag.objects.all(),
         required=True,
         many=True
     )
@@ -152,13 +151,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags:
-            RecipeTags.objects.get_or_create(
+            RecipeTag.objects.get_or_create(
                 recipe=recipe, tag=tag)
         for current_ingredient in ingredients:
             ingredient = current_ingredient['ingredient']
             amount = current_ingredient["amount"]
-            ingredient_amount, status = IngredientsAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
-            RecipeIngredients.objects.create(recipe=recipe, ingredient=ingredient_amount)
+            ingredient_amount, status = IngredientAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
+            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient_amount)
         return recipe
     
     # исправить валидацию отсутствующих полей, эксепшн без конкретики
@@ -167,14 +166,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags = validated_data.get('tags', [])
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
-        if 'image' in validated_data:
-            self.image = Base64ImageField()
+        instance.image = validated_data.get('image', instance.image)
         instance.cooking_time = validated_data.get('cooking_time', instance.cooking_time)
         instance.save()
         if tags:
             instance.tags.clear()
             for tag in tags:
-                RecipeTags.objects.create(recipe=instance, tag=tag)
+                RecipeTag.objects.create(recipe=instance, tag=tag)
         else:
             self.validate_tags(tags)
         if ingredients:
@@ -182,8 +180,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             for current_ingredient in ingredients:
                 ingredient = current_ingredient['ingredient']
                 amount = current_ingredient["amount"]
-                ingredient_amount, status = IngredientsAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
-                RecipeIngredients.objects.create(recipe=instance, ingredient=ingredient_amount)
+                ingredient_amount, status = IngredientAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
+                RecipeIngredient.objects.create(recipe=instance, ingredient=ingredient_amount)
         else:
             self.validate_tags(ingredients)
         return instance
@@ -198,9 +196,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         representation['ingredients'] = []
         representation['tags'] = []
         for db_ingredient in instance.ingredients.all():
-            ingredient = IngredientsAmountCreateSerializer(db_ingredient).data
-            ingredient['name'] = Ingredients.objects.get(id=ingredient['id']).name
-            ingredient['measurement_unit'] = Ingredients.objects.get(id=ingredient['id']).measurement_unit
+            ingredient = IngredientAmountCreateSerializer(db_ingredient).data
+            ingredient['name'] = Ingredient.objects.get(id=ingredient['id']).name
+            ingredient['measurement_unit'] = Ingredient.objects.get(id=ingredient['id']).measurement_unit
             representation['ingredients'].append(ingredient)
         for db_tag in instance.tags.all():
             tag = TagsSerializer(db_tag).data

@@ -7,20 +7,18 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from api.permissions import IsAuthenticatedOrAuthorOrReadOnly
-from api.serializers import (IngredientsSerializer,
+from api.serializers import (IngredientSerializer,
                              TagsSerializer,
                              RecipeCreateSerializer,
-                             IngredientsAmountCreateSerializer,
-                             IngredientsAmountSerializer,
                              FavoriteRecipeSerializer,
                              ShortRecipeSerializer,
                              IncartRecipeSerializer
 )
-from foodgram.models import (Ingredients,
-                             Tags,
-                             IngredientsAmount,
+from foodgram.models import (Ingredient,
+                             Tag,
+                             IngredientAmount,
                              Recipe,
-                             RecipeIngredients,
+                             RecipeIngredient,
                              FavoriteRecipe,
                              IncartRecipe,)
 
@@ -35,10 +33,10 @@ class RecipePagination(PageNumberPagination):
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     
-    serializer_class = IngredientsSerializer
+    serializer_class = IngredientSerializer
 
     def get_queryset(self):
-        queryset = Ingredients.objects.all()
+        queryset = Ingredient.objects.all()
         name = self.request.query_params.get('name')
         if name is not None:
             queryset = queryset.filter(name__startswith=name)
@@ -47,19 +45,8 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     
-    queryset = Tags.objects.all()
+    queryset = Tag.objects.all()
     serializer_class = TagsSerializer
-
-
-'''class IngredientsAmountViewSet(viewsets.ModelViewSet):
-    
-    queryset = IngredientsAmount.objects.all()
-    
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return IngredientsAmountSerializer
-        else:
-            return IngredientsAmountCreateSerializer'''
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -92,7 +79,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             tags = query_dict.pop('tags')
             tag_ids = []
             for tag in tags:
-                tag_ids.append(Tags.objects.get(slug=tag).id)
+                tag_ids.append(Tag.objects.get(slug=tag).id)
             queryset = queryset.filter(tags__in=tag_ids).distinct()
         return queryset
     
@@ -165,12 +152,12 @@ class RecipesViewSet(viewsets.ModelViewSet):
         for obj in queryset:
             recipes.append(obj.recipe.id)
         for recipe in recipes:
-            recipe_filter_qs = RecipeIngredients.objects.filter(recipe=recipe)
+            recipe_filter_qs = RecipeIngredient.objects.filter(recipe=recipe)
             for obj in recipe_filter_qs:
                 ingredients_amount.append(obj.ingredient.id)
         result = {}
         for ingredient_amount in ingredients_amount:
-            obj = IngredientsAmount.objects.get(id=ingredient_amount)
+            obj = IngredientAmount.objects.get(id=ingredient_amount)
             if (obj.ingredient.name, obj.ingredient.measurement_unit) in result:
                 old_value = result[obj.ingredient.name, obj.ingredient.measurement_unit]
                 result[obj.ingredient.name, obj.ingredient.measurement_unit] = old_value + obj.amount

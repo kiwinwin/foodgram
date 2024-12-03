@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def import_generic(self, conn, data):
         cursor = conn.cursor()
         for item in data:
-            cursor.execute("INSERT INTO foodgram_ingredients (name, measurement_unit) VALUES (%s, %s)", (item["name"], item["measurement_unit"]))
+            cursor.execute("INSERT INTO foodgram_ingredient (name, measurement_unit) VALUES (%s, %s)", (item["name"], item["measurement_unit"]))
         conn.commit()
         cursor.close()
         conn.close()

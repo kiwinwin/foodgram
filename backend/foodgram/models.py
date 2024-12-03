@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
+
 User = get_user_model()
 
 
@@ -19,7 +20,7 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
 
 
-class Tags(models.Model):
+class Tag(models.Model):
     name = models.CharField('Название тега',
                             max_length=32,
                             unique=True)
@@ -33,10 +34,10 @@ class Tags(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.slug
+        return self.name
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     
     name = models.CharField('Название ингредиента',
                             max_length=128)
@@ -52,9 +53,9 @@ class Ingredients(models.Model):
         return f'{self.name} {self.measurement_unit}'
 
 
-class IngredientsAmount(models.Model):
+class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Название ингредиента',)
     amount = models.IntegerField(
@@ -66,7 +67,6 @@ class IngredientsAmount(models.Model):
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
 
-    
     def __str__(self):
         return f'{self.ingredient.name} {self.amount}'
 
@@ -80,12 +80,12 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления (в минутах)',)
     tags = models.ManyToManyField(
-        Tags,
-        through='RecipeTags',
+        Tag,
+        through='RecipeTag',
         verbose_name='Теги')
     ingredients = models.ManyToManyField(
-        IngredientsAmount,
-        through='RecipeIngredients',
+        IngredientAmount,
+        through='RecipeIngredient',
         verbose_name='Ингредиенты')
     author = models.ForeignKey(
         User,
@@ -98,31 +98,34 @@ class Recipe(models.Model):
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
 
+    def __str__(self):
+        return self.name
 
-class RecipeTags(models.Model):
+
+class RecipeTag(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
     tag = models.ForeignKey(
-        Tags,
+        Tag,
         on_delete=models.CASCADE,
         verbose_name='Тег')
-    
+
     class Meta:
         ordering = ('id',)
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-    
+
     def __str__(self):
-        return self.tag.slug
+        return self.tag.name
 
 
-class RecipeIngredients(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
     ingredient = models.ForeignKey(
-        IngredientsAmount,
+        IngredientAmount,
         on_delete=models.CASCADE)
     
     class Meta:
@@ -132,7 +135,7 @@ class RecipeIngredients(models.Model):
     
     def __str__(self):
         return self.ingredient.ingredient.name
-        
+
 
 class FavoriteRecipe(models.Model):
     recipe = models.ForeignKey(
