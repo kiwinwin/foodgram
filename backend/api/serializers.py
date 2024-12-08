@@ -68,25 +68,25 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     
     class Meta:
-        fields = ('user', 'recipe')
+        fields = ('user', 'item')
         model = FavoriteRecipe
 
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=FavoriteRecipe.objects.all(),
-                fields=('user', 'recipe'))]
+                fields=('user', 'item'))]
 
 
 class IncartRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('user', 'recipe')
+        fields = ('user', 'item')
         model = IncartRecipe
 
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=IncartRecipe.objects.all(),
-                fields=('user', 'recipe'))]
+                fields=('user', 'item'))]
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -107,11 +107,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     def get_is_favorited(self, obj):
         request = self.context.get('request', None)
-        return FavoriteRecipe.objects.filter(recipe=obj.id, user=request.user.id).exists()
+        return FavoriteRecipe.objects.filter(item=obj.id, user=request.user.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request', None)
-        return IncartRecipe.objects.filter(recipe=obj.id, user=request.user.id).exists()
+        return IncartRecipe.objects.filter(item=obj.id, user=request.user.id).exists()
 
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
@@ -191,8 +191,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         request = self.context.get('request', None)
         representation = super().to_representation(instance)
         representation['author'] = CustomUserSerializer(instance.author).data
-        representation['is_favorited'] = FavoriteRecipe.objects.filter(recipe=instance.id, user=request.user.id).exists()
-        representation['is_in_shopping_cart'] = IncartRecipe.objects.filter(recipe=instance.id, user=request.user.id).exists()
+        representation['is_favorited'] = FavoriteRecipe.objects.filter(item=instance.id, user=request.user.id).exists()
+        representation['is_in_shopping_cart'] = IncartRecipe.objects.filter(item=instance.id, user=request.user.id).exists()
         representation['ingredients'] = []
         representation['tags'] = []
         for db_ingredient in instance.ingredients.all():

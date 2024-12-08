@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from api.views import RecipesViewSet
 from users.serializers import (
     CustomUserSerializer,
     CustomUserCreateSerializer,
@@ -27,14 +28,25 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     pagination_class = CustomUserPagination
     http_method_names = ["get", "post", "put", "delete"]
     lookup_field = 'pk'
+    model = User
+    imported = RecipesViewSet
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return CustomUserSerializer
-        elif self.request.method == "PUT":
-            return SetAvatarSerializer
-        else:
-            return CustomUserCreateSerializer
+        serializer = CustomUserCreateSerializer
+        if self.action == 'me' or self.request.method == "GET":
+            serializer = CustomUserSerializer
+        if self.action == 'set_password':
+            serializer = CustomSetPasswordSerializer
+        if self.action == 'avatar':
+            serializer = SetAvatarSerializer
+        if self.action == 'subscribe':
+            serializer = FollowCreateSerializer
+        if self.action == 'subscriptions':
+            serializer = ManyFollowUserSerializer
+        return serializer
+
+    def subscribing(self, request, through_model, result_serializer, *args, **kwargs):
+        return self.imported.favorite_incart(self, request, through_model, result_serializer, *args, **kwargs)
 
     @action(
         detail=False,
@@ -43,7 +55,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         user = request.user
-        serializer = CustomUserSerializer(user, context={
+        serializer = self.get_serializer(user, context={
         'request': request
     })
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -57,7 +69,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def avatar(self, request, *args, **kwargs):
         instance = request.user
         if request.method == "PUT":
-            serializer = SetAvatarSerializer(instance, data=request.data, partial=True)
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -71,7 +83,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     )
     def set_password(self, request, *args, **kwargs):
         user = request.user
-        serializer = CustomSetPasswordSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if user.check_password(serializer.data["current_password"]):
             request.user.set_password(serializer.data["new_password"])
@@ -85,28 +97,10 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def subscribe(self, request, *args, **kwargs):
-        user = request.user
-        following_id = self.kwargs.get('pk')
-        following_user = get_object_or_404(User, id=following_id)
-        if request.method == "POST":
-            serializer = FollowCreateSerializer(data={
-                "user": user.id,
-                "follows": following_id}, )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            serializer = FollowUserSerializer(following_user, context={
-        'request': request
-    })
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if Subscription.objects.filter(
-            user=user.id,
-            follows=following_id).exists():
-            instance = Subscription.objects.filter(
-                user=user.id,
-                follows=following_id)
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        raise serializers.ValidationError()  
+        through_model = Subscription
+        result_serializer = FollowUserSerializer
+        result = self.subscribing(request, through_model, result_serializer, *args, **kwargs)
+        return result
 
     @action(
         detail=False,
@@ -123,7 +117,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             queryset = queryset[:int(limit)]
         print(queryset)
         paginator = self.paginate_queryset(queryset)
-        serializer = ManyFollowUserSerializer(paginator, context={
+        serializer = self.get_serializer(paginator, context={
         'request': request
     }, many=True)
         return self.get_paginated_response(serializer.data)

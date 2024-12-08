@@ -14,8 +14,9 @@ User = get_user_model()
 
 class Base64AvatarField(serializers.ImageField):
 
-
     def to_internal_value(self, data):
+        if data is None:
+            raise serializers.ValidationError()
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
@@ -28,18 +29,16 @@ class CustomUserSerializer(UserSerializer):
 
     is_subscribed = serializers.SerializerMethodField()
 
-    class Meta(UserCreateSerializer.Meta):
+    class Meta(UserSerializer.Meta):
         fields = ('email', 'id', "username", 'first_name', 'last_name', 'avatar', 'is_subscribed')
         model = User
         read_only_fields = ('email', 'id', "username", 'first_name', 'last_name', 'avatar', 'is_subscribed')
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request', None)
-        try:
-            Subscription.objects.get(user=request.user.id, follows=obj.id)
+        if request is not None and Subscription.objects.filter(user=request.user.id, item=obj.id).exists():
             return True
-        except Exception as error:
-            return False
+        return False
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -81,15 +80,12 @@ class SetAvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar', )
         model = User
 
-    # исправить - топорно
-    def validate_avatar(self, value):
-        if not value:
+    def validate(self, data):
+        if 'avatar' not in data:
             raise serializers.ValidationError()
-        return value
+        return data
 
     def update(self, instance, validated_data):
-        if len(validated_data) == 0:
-            raise serializers.ValidationError()
         instance.avatar = validated_data.get('avatar', instance.avatar)
         instance.save()
         return instance
@@ -97,16 +93,16 @@ class SetAvatarSerializer(serializers.ModelSerializer):
 class FollowCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
-        fields = ('user', 'follows')
+        fields = ('user', 'item')
         model = Subscription
 
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=Subscription.objects.all(),
-                fields=('user', 'follows'))]
+                fields=('user', 'item'))]
     
     def validate(self, data):
-        if data["user"] == data["follows"]:
+        if data["user"] == data["item"]:
             raise serializers.ValidationError()
         return data
     
@@ -132,6 +128,6 @@ class ManyFollowUserSerializer(FollowUserSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request', None)
-        representation = super().to_representation(instance.follows)
+        representation = super().to_representation(instance.item)
         return representation
 

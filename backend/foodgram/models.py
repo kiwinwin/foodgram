@@ -6,20 +6,6 @@ from django.db import models
 User = get_user_model()
 
 
-class Subscription(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,)
-    follows = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        related_name='follows',
-        null=True, blank=True,)
-
-    class Meta:
-
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-
-
 class Tag(models.Model):
     name = models.CharField('Название тега',
                             max_length=32,
@@ -121,35 +107,63 @@ class RecipeTag(models.Model):
 
 
 class RecipeIngredient(models.Model):
+    """
+    Class for table with
+    favorite users recipes.
+    """
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
     ingredient = models.ForeignKey(
         IngredientAmount,
         on_delete=models.CASCADE)
-    
+
     class Meta:
         ordering = ('id',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-    
+
     def __str__(self):
         return self.ingredient.ingredient.name
 
 
 class FavoriteRecipe(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE)
+    """
+    CLass for table with
+    favorite users recipes.
+    """
+
     user = models.ForeignKey(
         User,
+        on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE)
 
 
 class IncartRecipe(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE)
+    """Class for table with
+    recipes in users cart."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE)
+    
+
+class Subscription(models.Model):
+    """Class for table with
+    users subscriptions."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    item = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='item',)
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
