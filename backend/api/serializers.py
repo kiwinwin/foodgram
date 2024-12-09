@@ -190,7 +190,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request', None)
         representation = super().to_representation(instance)
-        representation['author'] = CustomUserSerializer(instance.author).data
+        representation['author'] = CustomUserSerializer(instance.author, context={'request': request}).data
         representation['is_favorited'] = FavoriteRecipe.objects.filter(item=instance.id, user=request.user.id).exists()
         representation['is_in_shopping_cart'] = IncartRecipe.objects.filter(item=instance.id, user=request.user.id).exists()
         representation['ingredients'] = []

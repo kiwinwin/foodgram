@@ -108,16 +108,10 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
         )
     def subscriptions(self, request, *args, **kwargs):
-        query_dict = request.query_params.copy()
         user = request.user
         queryset = Subscription.objects.filter(user=user.id)
-        if 'limit' in query_dict:
-            print(query_dict.get('limit'))
-            limit = query_dict.get('limit')
-            queryset = queryset[:int(limit)]
-        print(queryset)
-        paginator = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(paginator, context={
+        paginated_queryset = self.paginate_queryset(queryset,)
+        serializer = self.get_serializer(paginated_queryset, context={
         'request': request
     }, many=True)
         return self.get_paginated_response(serializer.data)
