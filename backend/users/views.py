@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, serializers
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from api.views import RecipesViewSet
+from backend.pagination import Pagination
 from users.serializers import (
     CustomUserSerializer,
     CustomUserCreateSerializer,
@@ -18,35 +17,31 @@ from foodgram.models import Subscription
 
 User = get_user_model()
 
-class CustomUserPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = 'limit'
-    max_page_size = 1000
-
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    pagination_class = CustomUserPagination
+    pagination_class = Pagination
     http_method_names = ["get", "post", "put", "delete"]
-    lookup_field = 'pk'
+    lookup_field = "pk"
     model = User
     imported = RecipesViewSet
 
     def get_serializer_class(self):
         serializer = CustomUserCreateSerializer
-        if self.action == 'me' or self.request.method == "GET":
+        if self.action == "me" or self.request.method == "GET":
             serializer = CustomUserSerializer
-        if self.action == 'set_password':
+        if self.action == "set_password":
             serializer = CustomSetPasswordSerializer
-        if self.action == 'avatar':
+        if self.action == "avatar":
             serializer = SetAvatarSerializer
-        if self.action == 'subscribe':
+        if self.action == "subscribe":
             serializer = FollowCreateSerializer
-        if self.action == 'subscriptions':
+        if self.action == "subscriptions":
             serializer = ManyFollowUserSerializer
         return serializer
 
     def subscribing(self, request, through_model, result_serializer, *args, **kwargs):
-        return self.imported.favorite_incart(self, request, through_model, result_serializer, *args, **kwargs)
+        return self.imported.favorite_incart(
+            self, request, through_model, result_serializer, *args, **kwargs)
 
     @action(
         detail=False,
@@ -55,21 +50,21 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         user = request.user
-        serializer = self.get_serializer(user, context={
-        'request': request
-    })
+        serializer = self.get_serializer(
+            user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(
         detail=False,
         methods=("PUT", "DELETE"),
         permission_classes=(IsAuthenticated,),
-        url_path='me/avatar'
+        url_path="me/avatar"
     )
     def avatar(self, request, *args, **kwargs):
         instance = request.user
         if request.method == "PUT":
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer = self.get_serializer(
+                instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -105,13 +100,11 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=("GET",),
-        permission_classes=(IsAuthenticated,),
-        )
-    def subscriptions(self, request, *args, **kwargs):
+        permission_classes=(IsAuthenticated,),)
+    def subscriptions(self, request):
         user = request.user
         queryset = Subscription.objects.filter(user=user.id)
-        paginated_queryset = self.paginate_queryset(queryset,)
-        serializer = self.get_serializer(paginated_queryset, context={
-        'request': request
-    }, many=True)
+        paginated_queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(
+            paginated_queryset, context={"request": request}, many=True)
         return self.get_paginated_response(serializer.data)
