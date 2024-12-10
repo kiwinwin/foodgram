@@ -1,30 +1,13 @@
 import re
-import base64
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
-from rest_framework import serializers
 from djoser.serializers import (UserSerializer,
                                 UserCreateSerializer,)
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from api.shortrecipeserializer import ShortRecipeSerializer
+from backend.circleimport import ShortRecipeSerializer, Base64ImageField
 from foodgram.models import Subscription, Recipe
 
 User = get_user_model()
-
-
-class Base64AvatarField(serializers.ImageField):
-    """Сlass for users avatar field."""
-
-    def to_internal_value(self, data):
-        if data is None:
-            raise serializers.ValidationError()
-        if isinstance(data, str) and data.startswith("data:image"):
-            format, imgstr = data.split(";base64,")
-            ext = format.split("/")[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name="image." + ext)
-
-        return super().to_internal_value(data)
 
 
 class CustomUserSerializer(UserSerializer):
@@ -42,6 +25,7 @@ class CustomUserSerializer(UserSerializer):
             "last_name", "avatar", "is_subscribed")
 
     def get_is_subscribed(self, obj):
+
         request = self.context.get("request", None)
         if request is not None and \
             Subscription.objects.filter(user=request.user.id,
@@ -88,7 +72,7 @@ class CustomSetPasswordSerializer(serializers.Serializer):
 class SetAvatarSerializer(serializers.ModelSerializer):
     """Class for setting/updating users avatar."""
 
-    avatar = Base64AvatarField(required=True)
+    avatar = Base64ImageField(required=True)
 
     class Meta:
         fields = ("avatar", )

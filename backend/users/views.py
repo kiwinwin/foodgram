@@ -3,7 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.views import RecipesViewSet
+from api.views import RecipeViewSet
 from backend.pagination import Pagination
 from users.serializers import (
     CustomUserSerializer,
@@ -23,7 +23,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     lookup_field = "pk"
     model = User
-    imported = RecipesViewSet
+    imported = RecipeViewSet
 
     def get_serializer_class(self):
         serializer = CustomUserCreateSerializer
