@@ -1,26 +1,18 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, serializers
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
-from api.permissions import IsAuthenticatedOrAuthorOrReadOnly
-from api.serializers import (IngredientSerializer,
-                             TagsSerializer,
-                             RecipeSerializer,
-                             FavoriteRecipeSerializer,
-                             ShortRecipeSerializer,
-                             IncartRecipeSerializer)
+from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
+                             IngredientAmount, Recipe, RecipeIngredient, Tag)
 from foodgram_project.pagination import Pagination
-from foodgram.models import (Ingredient,
-                             Tag,
-                             IngredientAmount,
-                             Recipe,
-                             RecipeIngredient,
-                             FavoriteRecipe,
-                             IncartRecipe,)
+from rest_framework import serializers, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
+from api.permissions import IsAuthenticatedOrAuthorOrReadOnly
+from api.serializers import (FavoriteRecipeSerializer, IncartRecipeSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             ShortRecipeSerializer, TagsSerializer)
 
 User = get_user_model()
 

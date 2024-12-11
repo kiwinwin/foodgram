@@ -1,15 +1,10 @@
 from django.contrib.auth import get_user_model
+from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
+                             IngredientAmount, Recipe, RecipeIngredient,
+                             RecipeTag, Tag)
+from foodgram_project.circleimport import Base64ImageField
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
-from foodgram_project.circleimport import Base64ImageField
-from foodgram.models import (Ingredient,
-                             Tag,
-                             IngredientAmount,
-                             RecipeIngredient,
-                             Recipe,
-                             RecipeTag,
-                             FavoriteRecipe,
-                             IncartRecipe)
 
 
 User = get_user_model()

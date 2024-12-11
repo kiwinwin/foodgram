@@ -1,9 +1,9 @@
 import json
 import os
+
 import psycopg2
 from django.conf import settings
 from django.core.management import BaseCommand
-
 
 json_f = "tags.json"
 

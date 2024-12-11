@@ -1,9 +1,8 @@
 import json
 import os
+
 import psycopg2
-
 from django.conf import settings
-
 from django.core.management import BaseCommand
 
 json_f = "ingredients.json"
@@ -23,7 +22,8 @@ class Command(BaseCommand):
                   encoding="utf-8") as json_file:
             data = json.load(json_file)
         self.import_generic(conn, data)
-        self.stdout.write(self.style.SUCCESS("Данные ингредиентов загружены."))
+        self.stdout.write(
+            self.style.SUCCESS("Данные ингредиентов загружены."))
 
     def import_generic(self, conn, data):
         cursor = conn.cursor()

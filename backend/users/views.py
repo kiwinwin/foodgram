@@ -1,23 +1,24 @@
+from api.views import RecipeViewSet
 from django.contrib.auth import get_user_model
+from foodgram.models import Subscription
+from foodgram_project.pagination import Pagination
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.views import RecipeViewSet
-from foodgram_project.pagination import Pagination
-from users.serializers import (
-    CustomUserSerializer,
-    CustomUserCreateSerializer,
-    CustomSetPasswordSerializer,
-    SetAvatarSerializer,
-    FollowCreateSerializer,
-    FollowUserSerializer,
-    ManyFollowUserSerializer)
-from foodgram.models import Subscription
+
+from users.serializers import (CustomSetPasswordSerializer,
+                               CustomUserCreateSerializer,
+                               CustomUserSerializer, FollowCreateSerializer,
+                               FollowUserSerializer, ManyFollowUserSerializer,
+                               SetAvatarSerializer)
+
 
 User = get_user_model()
 
+
 class CustomUserViewSet(viewsets.ModelViewSet):
+
     queryset = User.objects.all()
     pagination_class = Pagination
     http_method_names = ["get", "post", "put", "delete"]

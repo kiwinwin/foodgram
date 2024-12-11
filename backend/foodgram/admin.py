@@ -1,15 +1,11 @@
 from django.contrib import admin
-from foodgram.models import (
-    Ingredient,
-    Recipe,
-    Tag,
-    RecipeTag,
-    RecipeIngredient,
-    IngredientAmount,
-    FavoriteRecipe)
+
+from foodgram.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                             Recipe, RecipeIngredient, RecipeTag, Tag)
 
 
 class TagsInline(admin.StackedInline):
+
     model = RecipeTag
     extra = 0
 
@@ -20,17 +16,20 @@ class IngredientsAmountAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientsInline(admin.StackedInline):
+
     model = RecipeIngredient
     extra = 0
 
 
 class IngredientsAdmin(admin.ModelAdmin):
+
     list_display = ("name", "measurement_unit",)
     search_fields = ("name",)
     empty_value_display = "-пусто-"
 
 
 class RecipeAdmin(admin.ModelAdmin):
+
     list_display = ("name", "author", )
     readonly_fields = ["favorited_count"]
     fieldsets = (
@@ -40,9 +39,7 @@ class RecipeAdmin(admin.ModelAdmin):
                 "image",
                 "text",
                 "cooking_time",),
-                "favorited_count"],
-                }),
-                )
+                "favorited_count"], }),)
     search_fields = ("name", "author__first_name",)
     list_filter = ("tags", )
     inlines = [TagsInline, RecipeIngredientsInline, ]
@@ -54,6 +51,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TagsAdmin(admin.ModelAdmin):
+
     list_display = ("id", "name", "slug",)
     empty_value_display = "-пусто-"
 
