@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from api.views import RecipeViewSet
-from backend.pagination import Pagination
+from foodgram_project.pagination import Pagination
 from users.serializers import (
     CustomUserSerializer,
     CustomUserCreateSerializer,

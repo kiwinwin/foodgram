@@ -31,24 +31,24 @@ class IngredientsAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', )
-    readonly_fields = ['favorited_count']
+    list_display = ("name", "author", )
+    readonly_fields = ["favorited_count"]
     fieldsets = (
         (None, {
-            'fields': [(
-                'name',
-                'image',
-                'text',
-                'cooking_time',),
-                'favorited_count'],
+            "fields": [(
+                "name",
+                "image",
+                "text",
+                "cooking_time",),
+                "favorited_count"],
                 }),
                 )
-    search_fields = ('name', 'author__first_name',)
-    list_filter = ('tags', )
+    search_fields = ("name", "author__first_name",)
+    list_filter = ("tags", )
     inlines = [TagsInline, RecipeIngredientsInline, ]
     empty_value_display = "-пусто-"
 
-    @admin.display(description='Общее число добавлений в избранное')
+    @admin.display(description="Общее число добавлений в избранное")
     def favorited_count(self, obj):
         return FavoriteRecipe.objects.filter(recipe=obj.id).count()
 

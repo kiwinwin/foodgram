@@ -12,7 +12,7 @@ from api.serializers import (IngredientSerializer,
                              FavoriteRecipeSerializer,
                              ShortRecipeSerializer,
                              IncartRecipeSerializer)
-from backend.pagination import Pagination
+from foodgram_project.pagination import Pagination
 from foodgram.models import (Ingredient,
                              Tag,
                              IngredientAmount,

@@ -13,13 +13,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         conn = psycopg2.connect(
-            dbname=os.getenv('POSTGRES_DB', 'django'),
-            host=os.getenv('DB_HOST', ''),
-            user=os.getenv('POSTGRES_USER', 'django'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            port=os.getenv('DB_PORT', 5432)
+            dbname=os.getenv("POSTGRES_DB", "django"),
+            host=os.getenv("DB_HOST", ""),
+            user=os.getenv("POSTGRES_USER", "django"),
+            password=os.getenv("POSTGRES_PASSWORD", ""),
+            port=os.getenv("DB_PORT", 5432)
             )
-        with open(f"{settings.BASE_DIR}/data/{json_f}", 'r', encoding="utf-8") as json_file:
+        with open(f"{settings.BASE_DIR}/data/{json_f}", "r", encoding="utf-8") as json_file:
             data = json.load(json_file)
         self.import_generic(conn, data)
         self.stdout.write(self.style.SUCCESS("Данные тегов загружены."))

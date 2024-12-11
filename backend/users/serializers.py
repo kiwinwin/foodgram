@@ -4,7 +4,7 @@ from djoser.serializers import (UserSerializer,
                                 UserCreateSerializer,)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from backend.circleimport import ShortRecipeSerializer, Base64ImageField
+from foodgram_project.circleimport import ShortRecipeSerializer, Base64ImageField
 from foodgram.models import Subscription, Recipe
 
 User = get_user_model()

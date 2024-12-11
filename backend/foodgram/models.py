@@ -7,17 +7,17 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    name = models.CharField('Название тега',
+    name = models.CharField("Название тега",
                             max_length=32,
                             unique=True)
-    slug = models.SlugField('Слаг тега',
+    slug = models.SlugField("Слаг тега",
                             max_length=32,
                             unique=True)
     
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
+        ordering = ("id",)
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
 
     def __str__(self):
         return self.name
@@ -25,58 +25,58 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
 
-    name = models.CharField('Название ингредиента',
+    name = models.CharField("Название ингредиента",
                             max_length=128)
-    measurement_unit = models.CharField('Единица измерения',
+    measurement_unit = models.CharField("Единица измерения",
                                         max_length=8)
 
     class Meta:
-        ordering = ('name',)
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        ordering = ("name",)
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
 
     def __str__(self):
-        return f'{self.name} {self.measurement_unit}'
+        return f"{self.name} {self.measurement_unit}"
 
 
 class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Название ингредиента',)
+        verbose_name="Название ингредиента",)
     amount = models.IntegerField(
-        'Количество',
+        "Количество",
         validators=[MinValueValidator(1),],)
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Количество ингредиента'
-        verbose_name_plural = 'Количество ингредиентов'
+        ordering = ("id",)
+        verbose_name = "Количество ингредиента"
+        verbose_name_plural = "Количество ингредиентов"
 
     def __str__(self):
-        return f'{self.ingredient.name} {self.amount}'
+        return f"{self.ingredient.name} {self.amount}"
 
 class Recipe(models.Model):
     image = models.ImageField(
-        'Картинка',
-        upload_to='recipes/images/',)
-    name = models.CharField('Название',
+        "Картинка",
+        upload_to="recipes/images/",)
+    name = models.CharField("Название",
                             max_length=256)
-    text = models.TextField('Описание')
+    text = models.TextField("Описание")
     cooking_time = models.PositiveSmallIntegerField(
-        'Время приготовления (в минутах)',)
+        "Время приготовления (в минутах)",)
     tags = models.ManyToManyField(
         Tag,
-        through='RecipeTag',
-        verbose_name='Теги')
+        through="RecipeTag",
+        verbose_name="Теги")
     ingredients = models.ManyToManyField(
         IngredientAmount,
-        through='RecipeIngredient',
-        verbose_name='Ингредиенты')
+        through="RecipeIngredient",
+        verbose_name="Ингредиенты")
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор рецепта',)
+        verbose_name="Автор рецепта",)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -95,12 +95,12 @@ class RecipeTag(models.Model):
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
-        verbose_name='Тег')
+        verbose_name="Тег")
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
+        ordering = ("id",)
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
 
     def __str__(self):
         return self.tag.name
@@ -120,9 +120,9 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        ordering = ("id",)
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
 
     def __str__(self):
         return self.ingredient.ingredient.name
@@ -162,8 +162,8 @@ class Subscription(models.Model):
     item = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='item',)
+        related_name="item",)
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"

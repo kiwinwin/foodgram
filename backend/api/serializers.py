@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
-from backend.circleimport import Base64ImageField
+from foodgram_project.circleimport import Base64ImageField
 from foodgram.models import (Ingredient,
                              Tag,
                              IngredientAmount,
