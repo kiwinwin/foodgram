@@ -47,10 +47,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def is_favorite_incart_filter(self, queryset, filterword, filtermodel):
         """Method for filtering queryset."""
         if filterword is not None:
+            user_id = self.request.user.id
             ids = []
             if bool(int(filterword)):
-                for obj in filtermodel.objects.filter(
-                    user=self.request.user.id):
+                for obj in filtermodel.objects.filter(user=user_id):
                     ids.append(obj.item.id)
                 queryset = queryset.filter(id__in=ids)
         return queryset
@@ -93,7 +93,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    def favorite_incart(self, request, through_model, result_serializer, *args, **kwargs):
+    def favorite_incart(self, request, through_model,
+                        result_serializer, *args, **kwargs):
         """Method for favorite, incart, subscribe actions."""
         user = request.user
         item_id = self.kwargs.get("pk")
@@ -158,15 +159,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         result = {}
         for ingredient_amount in ingredients_amount:
             obj = IngredientAmount.objects.get(id=ingredient_amount)
-            if (obj.ingredient.name,
-                obj.ingredient.measurement_unit) in result:
-                old_value = result[obj.ingredient.name,
-                                   obj.ingredient.measurement_unit]
-                result[obj.ingredient.name, obj.ingredient.measurement_unit] =\
-                    old_value + obj.amount
+            name = obj.ingredient.name
+            measurement_unit = obj.ingredient.measurement_unit
+            if (name, measurement_unit) in result:
+                old_value = result[name, measurement_unit]
+                result[name, measurement_unit] = old_value + obj.amount
             else:
-                result[obj.ingredient.name,
-                       obj.ingredient.measurement_unit] = obj.amount
+                result[name, measurement_unit] = obj.amount
         str_result = "Список покупок \n"
         file_name = "shopping_list.txt"
         for key, value in result.items():

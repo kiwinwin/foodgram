@@ -6,7 +6,6 @@ from foodgram_project.circleimport import Base64ImageField
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
 
-
 User = get_user_model()
 
 
