@@ -24,9 +24,9 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = Ingredient.objects.all()
-        name = self.request.query_params.get("name")
+        name = self.request.query_params.get("name").lower()
         if name is not None:
-            queryset = queryset.filter(name__startswith=name)
+            queryset = queryset.filter(name__icontains=name)
         return queryset
 
 
@@ -85,13 +85,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = IncartRecipeSerializer
         return serializer
 
-    def partial_update(self, request):
+    def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(
             instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def favorite_incart(self, request, through_model,
                         result_serializer, *args, **kwargs):
@@ -143,7 +143,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=("GET",),
         permission_classes=(IsAuthenticated,),
     )
-    def download_shopping_cart(self, request):
+    def download_shopping_cart(self, request, *args, **kwargs):
         """Method for downloading users
         in cart recipes ingredients."""
         user = request.user
@@ -186,7 +186,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(AllowAny,),
         url_path="get-link"
     )
-    def get_link(self, request):
+    def get_link(self, request, *args, **kwargs):
         """Method for getting recipes short link."""
         recipe_id = self.kwargs.get("pk")
         get_object_or_404(Recipe, id=recipe_id)

@@ -111,8 +111,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get("name", instance.name)
         instance.text = validated_data.get("text", instance.text)
         instance.image = validated_data.get("image", instance.image)
-        instance.cooking_time = validated_data.get(
-            "cooking_time", instance.cooking_time)
+        instance.cooking_time = validated_data.get("cooking_time", instance.cooking_time)
         instance.save()
         if tags:
             instance.tags.clear()
@@ -125,13 +124,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             for current_ingredient in ingredients:
                 ingredient = current_ingredient["ingredient"]
                 amount = current_ingredient["amount"]
-                ingredient_amount, status = \
-                    IngredientAmount.objects.get_or_create(
-                        ingredient=ingredient, amount=amount)
-                RecipeIngredient.objects.create(
-                    recipe=instance, ingredient=ingredient_amount)
+                ingredient_amount, status = IngredientAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
+                RecipeIngredient.objects.create(recipe=instance, ingredient=ingredient_amount)
         else:
-            self.validate_tags(ingredients)
+            self.validate_ingredients(ingredients)
         return instance
 
     def to_representation(self, instance):
