@@ -14,7 +14,7 @@ class Tag(models.Model):
     slug = models.SlugField("Слаг тега",
                             max_length=32,
                             unique=True)
-    
+
     class Meta:
         ordering = ("id",)
         verbose_name = "Тег"
@@ -67,9 +67,7 @@ class IngredientAmount(models.Model):
 
 
 class Recipe(models.Model):
-    """
-    Class for recipes table.
-    """
+    """Class for recipes table."""
 
     image = models.ImageField(
         "Картинка",
@@ -103,6 +101,9 @@ class Recipe(models.Model):
 
 
 class RecipeTag(models.Model):
+    """Class for recipe+tag
+    relations table."""
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
@@ -122,8 +123,8 @@ class RecipeTag(models.Model):
 
 class RecipeIngredient(models.Model):
     """
-    Class for table with
-    favorite users recipes.
+    Class for recipe+ingredient
+    relations table.
     """
 
     recipe = models.ForeignKey(
@@ -169,8 +170,7 @@ class IncartRecipe(models.Model):
 
 
 class Subscription(models.Model):
-    """Class for table with
-    users subscriptions."""
+    """Class for subscriptions table."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
     item = models.ForeignKey(
