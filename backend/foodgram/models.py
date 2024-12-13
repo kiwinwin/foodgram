@@ -2,11 +2,12 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-
 User = get_user_model()
 
 
 class Tag(models.Model):
+    """Class for tag table."""
+
     name = models.CharField("Название тега",
                             max_length=32,
                             unique=True)
@@ -24,6 +25,9 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """
+    Class for ingredient table.
+    """
 
     name = models.CharField("Название ингредиента",
                             max_length=128)
@@ -40,6 +44,11 @@ class Ingredient(models.Model):
 
 
 class IngredientAmount(models.Model):
+    """
+    Class for ingredient
+    and its amount table.
+    """
+
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
@@ -56,7 +65,12 @@ class IngredientAmount(models.Model):
     def __str__(self):
         return f"{self.ingredient.name} {self.amount}"
 
+
 class Recipe(models.Model):
+    """
+    Class for recipes table.
+    """
+
     image = models.ImageField(
         "Картинка",
         upload_to="recipes/images/",)
@@ -152,7 +166,7 @@ class IncartRecipe(models.Model):
     item = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
-    
+
 
 class Subscription(models.Model):
     """Class for table with

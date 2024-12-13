@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
-from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
-                             IngredientAmount, Recipe, RecipeIngredient,
-                             RecipeTag, Tag)
 from foodgram_project.circleimport import Base64ImageField
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
+
+from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
+                             IngredientAmount, Recipe, RecipeIngredient,
+                             RecipeTag, Tag)
 
 User = get_user_model()
 
@@ -111,7 +112,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get("name", instance.name)
         instance.text = validated_data.get("text", instance.text)
         instance.image = validated_data.get("image", instance.image)
-        instance.cooking_time = validated_data.get("cooking_time", instance.cooking_time)
+        instance.cooking_time = validated_data.get("cooking_time",
+                                                   instance.cooking_time)
         instance.save()
         if tags:
             instance.tags.clear()
@@ -124,8 +126,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             for current_ingredient in ingredients:
                 ingredient = current_ingredient["ingredient"]
                 amount = current_ingredient["amount"]
-                ingredient_amount, status = IngredientAmount.objects.get_or_create(ingredient=ingredient, amount=amount)
-                RecipeIngredient.objects.create(recipe=instance, ingredient=ingredient_amount)
+                ingredient_amount, status = \
+                    IngredientAmount.objects.get_or_create(
+                        ingredient=ingredient, amount=amount)
+                RecipeIngredient.objects.create(recipe=instance,
+                                                ingredient=ingredient_amount)
         else:
             self.validate_ingredients(ingredients)
         return instance
