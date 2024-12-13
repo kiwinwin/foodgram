@@ -40,7 +40,8 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             serializer = ManyFollowUserSerializer
         return serializer
 
-    def subscribing(self, request, through_model, result_serializer, *args, **kwargs):
+    def subscribing(self, request, through_model,
+                    result_serializer, *args, **kwargs):
         return self.imported.favorite_incart(
             self, request, through_model, result_serializer, *args, **kwargs)
 
@@ -54,7 +55,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(
             user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @action(
         detail=False,
         methods=("PUT", "DELETE"),
@@ -95,7 +96,8 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, *args, **kwargs):
         through_model = Subscription
         result_serializer = FollowUserSerializer
-        result = self.subscribing(request, through_model, result_serializer, *args, **kwargs)
+        result = self.subscribing(request, through_model,
+                                  result_serializer, *args, **kwargs)
         return result
 
     @action(

@@ -1,8 +1,9 @@
 import base64
 
 from django.core.files.base import ContentFile
-from foodgram.models import Recipe
 from rest_framework import serializers
+
+from foodgram.models import Recipe
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):

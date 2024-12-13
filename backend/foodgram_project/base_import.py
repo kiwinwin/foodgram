@@ -1,18 +1,18 @@
 import json
 import os
+
 import psycopg2
 from django.conf import settings
-
 from django.core.management import BaseCommand
 
 
 class BaseImport(BaseCommand):
 
-    def __init__(self,*args, **kwargs):
+    def __init__(self, message, command, json_f, *args, **kwargs):
         super().__init__()
-        message = self.message
-        command = self.command
-        json_f = self.json_f
+        self.message = message
+        self.command = command
+        self.json_f = json_f
 
     def handle(self, *args, **kwargs):
 
