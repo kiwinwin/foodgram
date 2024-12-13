@@ -9,10 +9,9 @@ from rest_framework.response import Response
 from foodgram.models import Subscription
 
 from .serializers import (CustomSetPasswordSerializer,
-                          CustomUserCreateSerializer,
-                          CustomUserSerializer, FollowCreateSerializer,
-                          FollowUserSerializer, ManyFollowUserSerializer,
-                          SetAvatarSerializer)
+                          CustomUserCreateSerializer, CustomUserSerializer,
+                          FollowCreateSerializer, FollowUserSerializer,
+                          ManyFollowUserSerializer, SetAvatarSerializer)
 
 User = get_user_model()
 
