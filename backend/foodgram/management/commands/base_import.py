@@ -10,9 +10,9 @@ class BaseImport(BaseCommand):
 
     def __init__(self, message, command, json_f, *args, **kwargs):
         super().__init__()
-        self.message = message
-        self.command = command
-        self.json_f = json_f
+        message = message
+        command = command
+        json_f = json_f
 
     def handle(self, *args, **kwargs):
 
