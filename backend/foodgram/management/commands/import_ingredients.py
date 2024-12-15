@@ -1,8 +1,8 @@
 from .base_import import BaseImport
 
 MESSAGE = "Данные ингредиентов загружены."
-COMMAND = "INSERT INTO foodgram_ingredients \
-    (name, measurement_unit) VALUES (%s, %s)"
+COMMAND = "INSERT INTO foodgram_ingredient \
+        (name, measurement_unit) VALUES (%s, %s)"
 FILE = "ingredients.json"
 
 
