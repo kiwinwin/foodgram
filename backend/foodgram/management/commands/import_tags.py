@@ -1,6 +1,5 @@
 from .base_import import BaseImport
 
-
 MESSAGE = "Данные тегов загружены."
 COMMAND = "INSERT INTO foodgram_tag (name, slug) VALUES (%s, %s)"
 FILE = "tags.json"
