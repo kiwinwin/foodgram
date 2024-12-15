@@ -9,6 +9,8 @@ DEBUG = 'true' == str(os.environ.get('DEBUG', False)).lower()
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(', ')
 
+CSRF_TRUSTED_ORIGINS = ['https://' + os.environ.get('ALLOWED_HOSTS')]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
