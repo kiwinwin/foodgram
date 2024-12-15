@@ -8,6 +8,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(max_length=254,
                               unique=True)
     avatar = models.ImageField(
+        null=True,
         upload_to="users/")
 
     USERNAME_FIELD = "email"
