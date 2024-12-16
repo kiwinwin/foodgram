@@ -2,6 +2,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from django.shortcuts import get_object_or_404
 from foodgram_project.circleimport import (Base64ImageField,
                                            ShortRecipeSerializer)
 from rest_framework import serializers
@@ -132,3 +133,27 @@ class ManyFollowUserSerializer(FollowUserSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance.item)
         return representation
+    
+
+class TokenSerializer(serializers.ModelSerializer):
+    """Class for getting users token."""
+
+    password = serializers.CharField(
+        required=True,
+        style={"input_type": "password"})
+    email = serializers.EmailField(
+        max_length=254,
+        required=True)
+
+    class Meta:
+        fields = ("email", "password")
+        model = User
+
+    def validate(self, data):
+        password = data.get("password")
+        email = data.get("email").lower()
+        user = get_object_or_404(User, email=email)
+        data["user"] = user
+        if user.check_password(password):
+            return data
+        raise serializers.ValidationError()

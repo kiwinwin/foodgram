@@ -102,15 +102,6 @@ MEDIA_ROOT = BASE_DIR / '/media/'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-DJOSER = {
-    'LOGIN_FIELD': 'email',
-    'PERMISSIONS': {
-        'user_list': {'rest_framework.permissions.AllowAny'},
-    },
-    'HIDE_USERS': False,
-}
-
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication'
