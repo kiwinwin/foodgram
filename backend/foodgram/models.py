@@ -55,7 +55,7 @@ class IngredientAmount(models.Model):
         verbose_name="Название ингредиента",)
     amount = models.IntegerField(
         "Количество",
-        validators=[MinValueValidator(1),],)
+        validators=[MinValueValidator(1), ])
 
     class Meta:
         ordering = ("id",)
