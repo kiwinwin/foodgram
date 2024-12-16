@@ -18,6 +18,8 @@ services:
     volumes:
       - static_volume:/backend_static/
       - media_volume:/media/
+    depends_on:
+      - db
 
   frontend:
     image: kiwinwin/foodgram_frontend
