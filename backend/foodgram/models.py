@@ -151,7 +151,8 @@ class FavoriteRecipe(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name='favoriterecipes')
     item = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
@@ -163,7 +164,8 @@ class IncartRecipe(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name='incartrecipes')
     item = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE)
@@ -172,12 +174,19 @@ class IncartRecipe(models.Model):
 class Subscription(models.Model):
     """Class for subscriptions table."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follows')
     item = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="item",)
 
     class Meta:
+        ordering = ('id',)
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
+    
+    def __str__(self):
+        return self.user.username

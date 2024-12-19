@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, models
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from foodgram_project.circleimport import (Base64ImageField,
@@ -27,13 +27,19 @@ class CustomUserSerializer(UserSerializer):
             "email", "id", "username", "first_name",
             "last_name", "avatar", "is_subscribed")
 
-    def get_is_subscribed(self, obj):
+    def get_user(self):
+        """Part of getting is_subscribed field."""
+        request = self.context.get('request', None)
+        user = request.user
+        if request is not None and user.__class__ is not models.AnonymousUser:
+            return user
+        return None
 
-        request = self.context.get("request", None)
-        if request is not None and \
-            Subscription.objects.filter(user=request.user.id,
-                                        item=obj.id).exists():
-            return True
+    def get_is_subscribed(self, obj):
+        """Getting is_subscribed field."""
+        user = self.get_user()
+        if user is not None:
+            user.follows.filter(item=obj.id).exists()
         return False
 
 
