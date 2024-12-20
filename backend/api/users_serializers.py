@@ -3,7 +3,6 @@ import re
 from django.contrib.auth import get_user_model, models
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
