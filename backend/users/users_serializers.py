@@ -3,12 +3,12 @@ import re
 from django.contrib.auth import get_user_model, models
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from backend.api.circleimport import (Base64ImageField,
+                                           ShortRecipeSerializer)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from foodgram.models import Recipe, Subscription
-
-from .circleimport import Base64ImageField, ShortRecipeSerializer
 
 User = get_user_model()
 

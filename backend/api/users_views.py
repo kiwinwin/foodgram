@@ -1,17 +1,16 @@
 from django.contrib.auth import get_user_model
-
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from api.views import RecipeViewSet
-from api.variables import USERS_SERIALIZERS
-from api.users_serializers import (
-    FollowUserSerializer, TokenSerializer)
-from foodgram_project.pagination import Pagination
 from foodgram.models import Subscription
+
+from .pagination import Pagination
+from .users_serializers import FollowUserSerializer, TokenSerializer
+from .variables import USERS_SERIALIZERS
+from .views import RecipeViewSet
 
 User = get_user_model()
 

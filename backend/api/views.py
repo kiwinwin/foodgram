@@ -8,16 +8,15 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from foodgram_project.pagination import Pagination
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient, Tag)
 
+from .pagination import Pagination
 from .permissions import IsAuthenticatedOrAuthorOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IncartRecipeSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer,
-                          ShortRecipeSerializer, TagsSerializer,
-                          ShoppingCartSerializer)
+                          IngredientSerializer, RecipeSerializer,
+                          ShoppingCartSerializer, ShortRecipeSerializer,
+                          TagsSerializer)
 
 User = get_user_model()
 
@@ -165,7 +164,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ids_stack = set()
         result = {}
         for item in serializer.data:
-            amount = item['amount']*amount_coeff[item['id']]
+            amount = item['amount'] * amount_coeff[item['id']]
             name, measure = (item['ingredient']['name'],
                              item['ingredient']['measurement_unit'])
             if item['ingredient']['id'] in ids_stack:

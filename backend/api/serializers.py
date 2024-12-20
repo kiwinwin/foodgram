@@ -4,7 +4,8 @@ from rest_framework import serializers
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient,
                              RecipeTag, Tag)
-from foodgram_project.circleimport import Base64ImageField
+
+from .circleimport import Base64ImageField
 from .users_serializers import CustomUserSerializer
 from .variables import (MAX_AMOUNT_VALUE, MAX_COOKING_TIME_VALUE,
                         MIN_AMOUNT_VALUE, MIN_COOKING_TIME_VALUE)
