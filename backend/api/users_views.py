@@ -1,19 +1,17 @@
-from api.views import RecipeViewSet
 from django.contrib.auth import get_user_model
-from foodgram_project.pagination import Pagination
+
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from api.views import RecipeViewSet
+from api.variables import USERS_SERIALIZERS
+from api.users_serializers import (
+    FollowUserSerializer, TokenSerializer)
+from foodgram_project.pagination import Pagination
 from foodgram.models import Subscription
-
-from .serializers import (CustomSetPasswordSerializer,
-                          CustomUserCreateSerializer, CustomUserSerializer,
-                          FollowCreateSerializer, FollowUserSerializer,
-                          ManyFollowUserSerializer, SetAvatarSerializer,
-                          TokenSerializer)
 
 User = get_user_model()
 
@@ -29,18 +27,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     imported = RecipeViewSet
 
     def get_serializer_class(self):
-        serializer = CustomUserCreateSerializer
-        if self.action == "me" or self.request.method == "GET":
-            serializer = CustomUserSerializer
-        if self.action == "set_password":
-            serializer = CustomSetPasswordSerializer
-        if self.action == "avatar":
-            serializer = SetAvatarSerializer
-        if self.action == "subscribe":
-            serializer = FollowCreateSerializer
-        if self.action == "subscriptions":
-            serializer = ManyFollowUserSerializer
-        return serializer
+        return USERS_SERIALIZERS[self.action]
 
     def subscribing(self, request, through_model,
                     result_serializer, *args, **kwargs):
@@ -103,9 +90,8 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         """Making and destroying users subscriptions."""
         through_model = Subscription
         result_serializer = FollowUserSerializer
-        result = self.subscribing(request, through_model,
-                                  result_serializer, *args, **kwargs)
-        return result
+        return self.subscribing(request, through_model,
+                                result_serializer, *args, **kwargs)
 
     @action(
         detail=False,

@@ -3,11 +3,11 @@ import re
 from django.contrib.auth import get_user_model, models
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from foodgram_project.circleimport import (Base64ImageField,
-                                           ShortRecipeSerializer)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from foodgram_project.circleimport import (Base64ImageField,
+                                           ShortRecipeSerializer)
 from foodgram.models import Recipe, Subscription
 
 User = get_user_model()
@@ -39,7 +39,8 @@ class CustomUserSerializer(UserSerializer):
         """Getting is_subscribed field."""
         user = self.get_user()
         if user is not None:
-            user.follows.filter(item=obj.id).exists()
+            return obj.first_name in user.follows.all().values_list(
+                'item__first_name', flat=True)
         return False
 
 

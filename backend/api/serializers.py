@@ -1,16 +1,13 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from api.variables import (
-    MIN_AMOUNT_VALUE,
-    MIN_COOKING_TIME_VALUE,
-    MAX_AMOUNT_VALUE,
-    MAX_COOKING_TIME_VALUE)
-from foodgram_project.circleimport import Base64ImageField
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient,
                              RecipeTag, Tag)
-from users.serializers import CustomUserSerializer
+from foodgram_project.circleimport import Base64ImageField
+from .users_serializers import CustomUserSerializer
+from .variables import (MAX_AMOUNT_VALUE, MAX_COOKING_TIME_VALUE,
+                        MIN_AMOUNT_VALUE, MIN_COOKING_TIME_VALUE)
 
 User = get_user_model()
 
@@ -61,6 +58,16 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         ingredient = representation.pop('ingredient')
         representation.update(ingredient)
         return representation
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Serializer for downloading incart recipes."""
+
+    ingredient = IngredientSerializer()
+
+    class Meta:
+        fields = ('id', 'ingredient', 'amount')
+        model = IngredientAmount
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):

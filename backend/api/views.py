@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -12,8 +14,10 @@ from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
 
 from .permissions import IsAuthenticatedOrAuthorOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IncartRecipeSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          ShortRecipeSerializer, TagsSerializer)
+                          IngredientSerializer,
+                          RecipeSerializer,
+                          ShortRecipeSerializer, TagsSerializer,
+                          ShoppingCartSerializer)
 
 User = get_user_model()
 
@@ -123,9 +127,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users favorite recipe."""
         through_model = FavoriteRecipe
         result_serializer = ShortRecipeSerializer
-        result = self.favorite_incart(
+        return self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
-        return result
 
     @action(
         detail=True,
@@ -135,43 +138,46 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users recipes in cart."""
         through_model = IncartRecipe
         result_serializer = ShortRecipeSerializer
-        result = self.favorite_incart(
+        return self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
-        return result
 
     @action(
         detail=False,
         methods=("GET",),
         permission_classes=(IsAuthenticated,),
     )
-    # переписать
     def download_shopping_cart(self, request, *args, **kwargs):
         """Method for downloading users
         in cart recipes ingredients."""
         user = request.user
-        queryset = IncartRecipe.objects.filter(user=user.id)
-        recipes = []
-        ingredients_amount = []
-        for obj in queryset:
-            recipes.append(obj.item.id)
-        for recipe in recipes:
-            recipe_filter_qs = RecipeIngredient.objects.filter(recipe=recipe)
-            for obj in recipe_filter_qs:
-                ingredients_amount.append(obj.ingredient.id)
+        queryset = user.incartrecipes.all()
+        recipe_qs = queryset.values('item_id')
+        ingredients_recipe = RecipeIngredient.objects.filter(
+            recipe__in=recipe_qs).values_list(
+                'ingredient_id', flat=True).order_by(
+                    'ingredient__ingredient')
+        amount_coeff = dict(Counter(ingredients_recipe))
+        ingredient_amount = IngredientAmount.objects.filter(
+            id__in=ingredients_recipe).order_by('ingredient__name')
+        serializer = ShoppingCartSerializer(
+            ingredient_amount,
+            many=True)
+        ids_stack = set()
         result = {}
-        for ingredient_amount in ingredients_amount:
-            obj = IngredientAmount.objects.get(id=ingredient_amount)
-            name = obj.ingredient.name
-            measurement_unit = obj.ingredient.measurement_unit
-            if (name, measurement_unit) in result:
-                old_value = result[name, measurement_unit]
-                result[name, measurement_unit] = old_value + obj.amount
+        for item in serializer.data:
+            amount = item['amount']*amount_coeff[item['id']]
+            name, measure = (item['ingredient']['name'],
+                             item['ingredient']['measurement_unit'])
+            if item['ingredient']['id'] in ids_stack:
+                old_amount = result[name, measure]
+                result[name, measure] = amount + old_amount
             else:
-                result[name, measurement_unit] = obj.amount
+                result[name, measure] = amount
+            ids_stack.add(item['ingredient']['id'])
         str_result = "Список покупок \n"
-        file_name = "shopping_list.txt"
         for key, value in result.items():
-            str_result += key[0] + " (" + key[1] + ") — " + str(value) + "\n"
+            str_result += f'{key[0]} ({key[1]}) — {value} \n'
+        file_name = "shopping_list.txt"
         with open(file_name, "w", encoding="utf-8") as file:
             file.write(str_result,)
         with open(file_name, encoding="utf-8") as file:

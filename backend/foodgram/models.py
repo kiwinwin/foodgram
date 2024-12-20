@@ -157,6 +157,14 @@ class FavoriteRecipe(models.Model):
         Recipe,
         on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ('id',)
+        verbose_name = "Избранное"
+        verbose_name_plural = "Избранные"
+
+    def __str__(self):
+        return self.user.username
+
 
 class IncartRecipe(models.Model):
     """Class for table with
@@ -170,6 +178,14 @@ class IncartRecipe(models.Model):
         Recipe,
         on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ('id',)
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзина"
+
+    def __str__(self):
+        return self.user.username
+
 
 class Subscription(models.Model):
     """Class for subscriptions table."""
@@ -180,13 +196,12 @@ class Subscription(models.Model):
         related_name='follows')
     item = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
-        related_name="item",)
+        on_delete=models.CASCADE,)
 
     class Meta:
         ordering = ('id',)
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-    
+
     def __str__(self):
         return self.user.username
