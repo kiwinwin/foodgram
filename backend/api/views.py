@@ -126,8 +126,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users favorite recipe."""
         through_model = FavoriteRecipe
         result_serializer = ShortRecipeSerializer
-        return self.favorite_incart(
+        result = self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
+        return result
 
     @action(
         detail=True,
@@ -137,8 +138,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users recipes in cart."""
         through_model = IncartRecipe
         result_serializer = ShortRecipeSerializer
-        return self.favorite_incart(
+        result = self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
+        return result
 
     @action(
         detail=False,

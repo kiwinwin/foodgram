@@ -89,8 +89,9 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         """Making and destroying users subscriptions."""
         through_model = Subscription
         result_serializer = FollowUserSerializer
-        return self.subscribing(request, through_model,
-                                result_serializer, *args, **kwargs)
+        result = self.subscribing(request, through_model,
+                                  result_serializer, *args, **kwargs)
+        return result
 
     @action(
         detail=False,
