@@ -51,12 +51,12 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
 
     class Meta:
-        fields = ('ingredient', 'amount')
+        fields = ("ingredient", "amount")
         model = IngredientAmount
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        ingredient = representation.pop('ingredient')
+        ingredient = representation.pop("ingredient")
         representation.update(ingredient)
         return representation
 
@@ -67,7 +67,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
 
     class Meta:
-        fields = ('id', 'ingredient', 'amount')
+        fields = ("id", "ingredient", "amount")
         model = IngredientAmount
 
 
@@ -109,15 +109,15 @@ class RecipeReperesentationSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("id", "ingredients", "tags", "image",
                   "name", "text", "cooking_time", "author",
-                  'is_favorited', 'is_in_shopping_cart')
+                  "is_favorited", "is_in_shopping_cart")
         model = Recipe
         read_only_fields = ("id", "ingredients", "tags",
                             "image", "name", "text",
                             "cooking_time", "author",
-                            'is_favorited', 'is_in_shopping_cart')
+                            "is_favorited", "is_in_shopping_cart")
 
     def get_user(self):
-        request = self.context.get('request', None)
+        request = self.context.get("request", None)
         user = request.user
         if request is not None and user.__class__ is not models.AnonymousUser:
             return user
@@ -128,7 +128,7 @@ class RecipeReperesentationSerializer(serializers.ModelSerializer):
         user = self.get_user()
         if user is not None:
             return obj.name in user.favoriterecipes.all().values_list(
-                'item__name', flat=True)
+                "item__name", flat=True)
         return False
 
     def get_is_in_shopping_cart(self, obj):
@@ -136,7 +136,7 @@ class RecipeReperesentationSerializer(serializers.ModelSerializer):
         user = self.get_user()
         if user is not None:
             return obj.name in user.incartrecipes.all().values_list(
-                'item__name', flat=True)
+                "item__name", flat=True)
         return False
 
 
@@ -174,11 +174,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         ingredient_amount_list = []
         for current_ingredient in ingredients:
-            ingredient = current_ingredient['ingredient']
+            ingredient = current_ingredient["ingredient"]
             amount = current_ingredient["amount"]
-            ingredient_amount, status = \
-                IngredientAmount.objects.get_or_create(
-                    ingredient=ingredient, amount=amount)
+            ingredient_amount, status = IngredientAmount.objects.get_or_create(
+                ingredient=ingredient, amount=amount)
             ingredient_amount_list.append(ingredient_amount)
         return ingredient_amount_list
 
@@ -228,27 +227,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         """Method representing Recipes object data."""
         request = self.context.get("request", None)
         representation = RecipeReperesentationSerializer(
-            instance, context={'request': request})
+            instance, context={"request": request})
         return representation.data
-
-        '''representation["author"] = CustomUserSerializer(
-            instance.author, context={"request": request}).data
-        representation["is_favorited"] = FavoriteRecipe.objects.filter(
-            item=instance.id, user=request.user.id).exists()
-        representation["is_in_shopping_cart"] = IncartRecipe.objects.filter(
-            item=instance.id, user=request.user.id).exists()
-        representation["ingredients"] = []
-        representation["tags"] = []
-        for db_ingredient in instance.ingredients.all():
-            ingredient = IngredientAmountCreateSerializer(db_ingredient).data
-            ingredient["name"] = Ingredient.objects.get(
-                id=ingredient["id"]).name
-            ingredient["measurement_unit"] = Ingredient.objects.get(
-                id=ingredient["id"]).measurement_unit
-            representation["ingredients"].append(ingredient)
-        for db_tag in instance.tags.all():
-            tag = TagsSerializer(db_tag).data
-            representation["tags"].append(tag)'''
 
     def validate_ingredients(self, value):
         """Method validating ingredients field."""
@@ -256,9 +236,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError()
         ids_stack = set()
         for item in value:
-            if item['ingredient'].id in ids_stack:
+            if item["ingredient"].id in ids_stack:
                 raise serializers.ValidationError()
-            ids_stack.add(item['ingredient'].id)
+            ids_stack.add(item["ingredient"].id)
         return value
 
     def validate_tags(self, value):

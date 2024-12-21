@@ -1,6 +1,6 @@
 from collections import Counter
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status, viewsets
@@ -48,37 +48,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = Pagination
     model = Recipe
 
-    def is_favorite_incart_filter(self, queryset, filterword, filtermodel):
-        """Method for filtering queryset."""
-        if filterword is not None:
-            user_id = self.request.user.id
-            ids = []
-            if bool(int(filterword)):
-                for obj in filtermodel.objects.filter(user=user_id):
-                    ids.append(obj.item.id)
-                queryset = queryset.filter(id__in=ids)
-        return queryset
-
     def get_queryset(self):
         queryset = Recipe.objects.all()
+        user = self.request.user
         query_dict = self.request.query_params.copy()
         author = query_dict.get("author")
         is_favorited = query_dict.get("is_favorited")
         is_in_shopping_cart = query_dict.get("is_in_shopping_cart")
         if author is not None:
             queryset = queryset.filter(author=author)
-        queryset = self.is_favorite_incart_filter(
-            queryset=queryset, filterword=is_favorited,
-            filtermodel=FavoriteRecipe)
-        queryset = self.is_favorite_incart_filter(
-            queryset=queryset, filterword=is_in_shopping_cart,
-            filtermodel=IncartRecipe)
+        if user.__class__ is not models.AnonymousUser:
+            if is_favorited is not None and bool(int(is_favorited)):
+                queryset = queryset.filter(
+                    id__in=user.favoriterecipes.all().values("item__id"))
+            if is_in_shopping_cart is not None and bool(
+                int(is_in_shopping_cart)):
+                queryset = queryset.filter(
+                    id__in=user.incartrecipes.all().values("item__id"))
         if "tags" in query_dict:
             tags = query_dict.pop("tags")
-            tag_ids = []
-            for tag in tags:
-                tag_ids.append(Tag.objects.get(slug=tag).id)
-            queryset = queryset.filter(tags__in=tag_ids).distinct()
+            queryset = queryset.filter(tags__slug__in=tags).distinct()
         return queryset
 
     def get_serializer_class(self):
@@ -126,9 +115,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users favorite recipe."""
         through_model = FavoriteRecipe
         result_serializer = ShortRecipeSerializer
-        result = self.favorite_incart(
+        return self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
-        return result
 
     @action(
         detail=True,
@@ -138,9 +126,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Method for users recipes in cart."""
         through_model = IncartRecipe
         result_serializer = ShortRecipeSerializer
-        result = self.favorite_incart(
+        return self.favorite_incart(
             request, through_model, result_serializer, *args, **kwargs)
-        return result
 
     @action(
         detail=False,
@@ -152,32 +139,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
         in cart recipes ingredients."""
         user = request.user
         queryset = user.incartrecipes.all()
-        recipe_qs = queryset.values('item_id')
+        recipe_qs = queryset.values("item_id")
         ingredients_recipe = RecipeIngredient.objects.filter(
             recipe__in=recipe_qs).values_list(
-                'ingredient_id', flat=True).order_by(
-                    'ingredient__ingredient')
+                "ingredient_id", flat=True).order_by(
+                    "ingredient__ingredient")
         amount_coeff = dict(Counter(ingredients_recipe))
         ingredient_amount = IngredientAmount.objects.filter(
-            id__in=ingredients_recipe).order_by('ingredient__name')
+            id__in=ingredients_recipe).order_by("ingredient__name")
         serializer = ShoppingCartSerializer(
             ingredient_amount,
             many=True)
         ids_stack = set()
         result = {}
         for item in serializer.data:
-            amount = item['amount'] * amount_coeff[item['id']]
-            name, measure = (item['ingredient']['name'],
-                             item['ingredient']['measurement_unit'])
-            if item['ingredient']['id'] in ids_stack:
+            amount = item["amount"] * amount_coeff[item["id"]]
+            name, measure = (item["ingredient"]["name"],
+                             item["ingredient"]["measurement_unit"])
+            if item["ingredient"]["id"] in ids_stack:
                 old_amount = result[name, measure]
                 result[name, measure] = amount + old_amount
             else:
                 result[name, measure] = amount
-            ids_stack.add(item['ingredient']['id'])
+            ids_stack.add(item["ingredient"]["id"])
         str_result = "Список покупок \n"
         for key, value in result.items():
-            str_result += f'{key[0]} ({key[1]}) — {value} \n'
+            str_result += f"{key[0]} ({key[1]}) — {value} \n"
         file_name = "shopping_list.txt"
         with open(file_name, "w", encoding="utf-8") as file:
             file.write(str_result,)

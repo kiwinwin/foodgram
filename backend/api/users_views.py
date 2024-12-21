@@ -89,9 +89,9 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         """Making and destroying users subscriptions."""
         through_model = Subscription
         result_serializer = FollowUserSerializer
-        result = self.subscribing(request, through_model,
-                                  result_serializer, *args, **kwargs)
-        return result
+        return self.subscribing(
+            request, through_model,
+            result_serializer, *args, **kwargs)
 
     @action(
         detail=False,
@@ -100,7 +100,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def subscriptions(self, request, *args, **kwargs):
         """Method for getting users subscriptions list."""
         user = request.user
-        queryset = Subscription.objects.filter(user=user.id)
+        queryset = user.follows.all()
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(
             paginated_queryset, context={"request": request}, many=True)
