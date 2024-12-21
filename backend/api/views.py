@@ -61,8 +61,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if is_favorited is not None and bool(int(is_favorited)):
                 queryset = queryset.filter(
                     id__in=user.favoriterecipes.all().values("item__id"))
-            if is_in_shopping_cart is not None and bool(
-                int(is_in_shopping_cart)):
+            if (is_in_shopping_cart is not None
+                    and bool(int(is_in_shopping_cart))):
                 queryset = queryset.filter(
                     id__in=user.incartrecipes.all().values("item__id"))
         if "tags" in query_dict:
