@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, models
 from rest_framework import serializers
 
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
@@ -117,20 +117,26 @@ class RecipeReperesentationSerializer(serializers.ModelSerializer):
                             'is_favorited', 'is_in_shopping_cart')
 
     def get_user(self):
-        return CustomUserSerializer.get_user(self)
+        request = self.context.get('request', None)
+        user = request.user
+        if request is not None and user.__class__ is not models.AnonymousUser:
+            return user
+        return None
 
     def get_is_favorited(self, obj):
         """Getting is_favorited field."""
         user = self.get_user()
         if user is not None:
-            user.favoriterecipes.filter(item=obj.id).exists()
+            return obj.name in user.favoriterecipes.all().values_list(
+                'item__name', flat=True)
         return False
 
     def get_is_in_shopping_cart(self, obj):
         """Getting is_in_shopping_cart field."""
         user = self.get_user()
         if user is not None:
-            user.incartrecipes.filter(item=obj.id).exists()
+            return obj.name in user.incartrecipes.all().values_list(
+                'item__name', flat=True)
         return False
 
 
@@ -222,8 +228,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         """Method representing Recipes object data."""
         request = self.context.get("request", None)
         representation = RecipeReperesentationSerializer(
-            instance, context={'request': request}).data
-        return representation
+            instance, context={'request': request})
+        return representation.data
 
         '''representation["author"] = CustomUserSerializer(
             instance.author, context={"request": request}).data
