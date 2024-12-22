@@ -9,6 +9,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
+                             IngredientAmount, Recipe, RecipeIngredient,
+                             Subscription, Tag)
+
 from .pagination import Pagination
 from .permissions import IsAuthenticatedOrAuthorOrReadOnly
 from .serializers import (CustomSetPasswordSerializer,
@@ -20,9 +24,6 @@ from .serializers import (CustomSetPasswordSerializer,
                           ShoppingCartSerializer, ShortRecipeSerializer,
                           TagsSerializer, TokenSerializer)
 
-from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
-                             IngredientAmount, Recipe, RecipeIngredient,
-                             Subscription, Tag)
 
 User = get_user_model()
 
