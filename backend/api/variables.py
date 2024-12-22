@@ -1,7 +1,7 @@
-from .users_serializers import (CustomSetPasswordSerializer,
-                                CustomUserCreateSerializer,
-                                CustomUserSerializer, FollowCreateSerializer,
-                                ManyFollowUserSerializer, SetAvatarSerializer)
+from .serializers import (CustomSetPasswordSerializer,
+                          CustomUserCreateSerializer, CustomUserSerializer,
+                          FollowCreateSerializer, ManyFollowUserSerializer,
+                          SetAvatarSerializer)
 
 MIN_AMOUNT_VALUE = 1
 MAX_AMOUNT_VALUE = 32000
