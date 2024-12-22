@@ -15,14 +15,29 @@ from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
 
 from .pagination import Pagination
 from .permissions import IsAuthenticatedOrAuthorOrReadOnly
-from .serializers import (FavoriteRecipeSerializer, FollowUserSerializer,
+from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
+                          CustomSetPasswordSerializer,
+                          FavoriteRecipeSerializer, FollowUserSerializer,
+                          FollowCreateSerializer,
                           IncartRecipeSerializer, IngredientSerializer,
-                          RecipeSerializer, ShoppingCartSerializer,
+                          ManyFollowUserSerializer, RecipeSerializer,
+                          SetAvatarSerializer, ShoppingCartSerializer,
                           ShortRecipeSerializer, TagsSerializer,
                           TokenSerializer)
-from .variables import USERS_SERIALIZERS
 
 User = get_user_model()
+
+USERS_SERIALIZERS = {
+    'create': CustomUserCreateSerializer,
+    'get': CustomUserSerializer,
+    'retrieve': CustomUserSerializer,
+    'list': CustomUserSerializer,
+    'me': CustomUserSerializer,
+    'set_password': CustomSetPasswordSerializer,
+    'avatar': SetAvatarSerializer,
+    'subscribe': FollowCreateSerializer,
+    'subscriptions': ManyFollowUserSerializer,
+}
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
