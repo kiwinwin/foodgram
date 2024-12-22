@@ -9,21 +9,20 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from .pagination import Pagination
+from .permissions import IsAuthenticatedOrAuthorOrReadOnly
+from .serializers import (CustomSetPasswordSerializer,
+                          CustomUserCreateSerializer, CustomUserSerializer,
+                          FavoriteRecipeSerializer, FollowCreateSerializer,
+                          FollowUserSerializer, IncartRecipeSerializer,
+                          IngredientSerializer, ManyFollowUserSerializer,
+                          RecipeSerializer, SetAvatarSerializer,
+                          ShoppingCartSerializer, ShortRecipeSerializer,
+                          TagsSerializer, TokenSerializer)
+
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient,
                              Subscription, Tag)
-
-from .pagination import Pagination
-from .permissions import IsAuthenticatedOrAuthorOrReadOnly
-from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          CustomSetPasswordSerializer,
-                          FavoriteRecipeSerializer, FollowUserSerializer,
-                          FollowCreateSerializer,
-                          IncartRecipeSerializer, IngredientSerializer,
-                          ManyFollowUserSerializer, RecipeSerializer,
-                          SetAvatarSerializer, ShoppingCartSerializer,
-                          ShortRecipeSerializer, TagsSerializer,
-                          TokenSerializer)
 
 User = get_user_model()
 
