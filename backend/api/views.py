@@ -24,7 +24,6 @@ from .serializers import (CustomSetPasswordSerializer,
                           ShoppingCartSerializer, ShortRecipeSerializer,
                           TagsSerializer, TokenSerializer)
 
-
 User = get_user_model()
 
 USERS_SERIALIZERS = {
