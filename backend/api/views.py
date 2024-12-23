@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
 # линтер ругается на отсутствие строки
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient,
