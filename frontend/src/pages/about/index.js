@@ -36,11 +36,13 @@ const About = ({ updateOrders, orders }) => {
           <h2 className={styles.additionalTitle}>
             Ссылки
           </h2>
-          <div className={styles.text}>
+          <div>
             <p>
+              # исправлено, но не отображается ссылка
               Код проекта находится тут - <a href="https://github.com/kiwinwin/foodgram">Github</a>
             </p>
             <p>
+              # исправлено, но не отображается ссылка
               Автор проекта: <a href="https://github.com/kiwinwin/">kiwinwin</a>
             </p>
           </div>
