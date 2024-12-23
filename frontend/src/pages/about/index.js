@@ -37,11 +37,11 @@ const About = ({ updateOrders, orders }) => {
             Ссылки
           </h2>
           <div className={styles.text}>
-            <p className={styles.textItem}>
-              Код проекта находится тут - <a href="https://github.com/kiwinwin/foodgram" target="_blank">Github</a>
+            <p>
+              Код проекта находится тут - <a href="https://github.com/kiwinwin/foodgram">Github</a>
             </p>
-            <p className={styles.textItem}>
-              Автор проекта: <a href="https://github.com/kiwinwin/" target="_blank">kiwinwin</a>
+            <p>
+              Автор проекта: <a href="https://github.com/kiwinwin/">kiwinwin</a>
             </p>
           </div>
         </aside>
