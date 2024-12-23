@@ -38,10 +38,10 @@ const About = ({ updateOrders, orders }) => {
           </h2>
           <div className={styles.text}>
             <p className={styles.textItem}>
-              Код проекта находится тут - <a href="https://github.com/kiwinwin/foodgram" className={styles.textLink}>Github</a>
+              Код проекта находится тут - <a href="https://github.com/kiwinwin/foodgram" target="_blank">Github</a>
             </p>
             <p className={styles.textItem}>
-              Автор проекта: <a href="https://github.com/kiwinwin/" className={styles.textLink}>Имя Автора</a>
+              Автор проекта: <a href="https://github.com/kiwinwin/" target="_blank">kiwinwin</a>
             </p>
           </div>
         </aside>
