@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
+# линтер ругается на отсутствие строки
 from foodgram.models import (FavoriteRecipe, IncartRecipe, Ingredient,
                              IngredientAmount, Recipe, RecipeIngredient,
                              RecipeTag, Subscription, Tag)
