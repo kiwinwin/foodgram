@@ -52,23 +52,22 @@ psycopg2-binary 2.9.10
 
 ## Инструкция по запуску
 
-форкнуть репозиторий проекта: kiwinwin/foodgram
-клонировать форкнутый репозиторий
-в репозитории проекта во вкладке settings/Secrets and variables/actions определить ваши secrets: Логин и пароль вашего профиля на Docker.com:
-DOCKER_PASSWORD
-DOCKER_USERNAME Данные вашего удалённого сервера:
-HOST (IP-адрес вашего сервера)
-SSH_KEY (закрытый SSH-ключ)
-USER (имя пользователя)
-SSH_PASSPHRASE (passphrase от закрытого SSH-ключа) 
-на сервере:
-создайте директорию foodgram и создайте в ней файл .env. В файле .env определите значения переменных SECRET_KEY и ALLOWED_HOSTS;
-
-определите настройки location в секции server в файле /etc/nginx/sites-enabled/default: server { server_name <IP-адрес вашего сервера> <доменное имя вашего сайта>; location / { proxy_set_header Host $http_host; proxy_pass http://127.0.0.1:8080; } }
-
-в директории проекта в файле docker-compose.production.yml замените строчки с указанием image: kiwinwin/... на ваш image: <логин вашего профиля на Docker.com>
-сделайте пуш: git add . git commit -m "<ваше сообщение коммита>" git push
-дождитесь результатов actions main.yml и, если deploy прошёл успешно и в вашей БД нет тегов и ингредиентов, запустите actions import_tags_ingredients.yml.
+1. форкнуть репозиторий проекта: kiwinwin/foodgram
+2. клонировать форкнутый репозиторий
+3. в репозитории проекта во вкладке settings/Secrets and variables/actions определить ваши secrets: Логин и пароль вашего профиля на Docker.com:
+* DOCKER_PASSWORD
+* DOCKER_USERNAME
+* Данные вашего удалённого сервера:
+  - HOST (IP-адрес вашего сервера)
+  - SSH_KEY (закрытый SSH-ключ)
+  - USER (имя пользователя)
+  - SSH_PASSPHRASE (passphrase от закрытого SSH-ключа) 
+4. на сервере:
+* создайте директорию foodgram и создайте в ней файл .env. В файле .env определите значения переменных SECRET_KEY и ALLOWED_HOSTS;
+* определите настройки location в секции server в файле /etc/nginx/sites-enabled/default: server { server_name <IP-адрес вашего сервера> <доменное имя вашего сайта>; location / { proxy_set_header Host $http_host; proxy_pass http://127.0.0.1:8080; } }
+* в директории проекта в файле docker-compose.production.yml замените строчки с указанием image: kiwinwin/... на ваш image: <логин вашего профиля на Docker.com>
+5. сделайте пуш: git add . git commit -m "<ваше сообщение коммита>" git push
+6. дождитесь результатов actions main.yml и, если deploy прошёл успешно и в вашей БД нет тегов и ингредиентов, запустите actions import_tags_ingredients.yml.
 
 
 ## Эндпоинты
